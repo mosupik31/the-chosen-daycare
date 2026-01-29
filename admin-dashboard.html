@@ -1006,6 +1006,25 @@
             updateDashboardStats();
             closeModal('addChildModal');
             showNotification('Child added successfully!');
+
+            <!-- Add this to your verification section card -->
+<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <h4><i class="fas fa-exclamation-triangle"></i> Quick Fix for Mismatched Code</h4>
+    <p>Parent entered: <code>20260120karabomosupi</code></p>
+    <p>Expected format: <code>20060131karabomsupi</code></p>
+    
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-warning" onclick="fixMismatchedCode()">
+            <i class="fas fa-magic"></i> Add Alternative Code
+        </button>
+        <button class="btn btn-info" onclick="acceptAlternativeCodeFormats()">
+            <i class="fas fa-plus-circle"></i> Add All Variations
+        </button>
+        <button class="btn btn-primary" onclick="contactParentForCorrection()">
+            <i class="fas fa-phone"></i> Contact Parent
+        </button>
+    </div>
+</div>
             
             // Add to recent activity
             addActivity(`Added new child: ${child.firstName} ${child.lastName}`);
