@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal Setup - The Chosen Day Care</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Portal Setup Specific Styles */
+        .portal-setup-container {
+            padding: 120px 0 80px;
+            min-height: 100vh;
+            background-color: var(--light-color);
+        }
+        
+        .setup-wizard {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .wizard-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+        }
+        
+        .wizard-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .wizard-steps:before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+        
+        .step-indicator {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+        
+        .step-indicator.active .step-number {
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+        
+        .step-indicator.completed .step-number {
+            background-color: var(--success-color);
+        }
+        
+        .step-content {
+            padding: 40px;
+        }
+        
+        .step-panel {
+            display: none;
+        }
+        
+        .step-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .verification-guide {
+            background-color: #f0f7ff;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .code-example {
+            font-family: 'Courier New', monospace;
+            background-color: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .password-requirements {
+            margin-top: 20px;
+        }
+        
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            color: var(--gray-color);
+        }
+        
+        .requirement.valid {
+            color: var(--success-color);
+        }
+        
+        .requirement.invalid {
+            color: var(--danger-color);
+        }
+        
+        .wizard-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (Same as index.html) -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo.png" alt="The Chosen Day Care Logo" height="60">
+                <div class="logo-text">
+                    <h1>THE CHOSEN DAY CARE</h1>
+                    <p>Nurturing Tomorrow's Leaders Today</p>
+                </div>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#about">About Us</a></li>
+                    <li><a href="index.html#programs">Programs</a></li>
+                    <li><a href="index.html#admissions">Admissions</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="login.html" class="btn-login">Parent Portal</a></li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Portal Setup Content -->
+    <div class="portal-setup-container">
+        <div class="container">
+            <div class="setup-wizard">
+                <div class="wizard-header">
+                    <h2 style="text-align: center; margin-bottom: 20px;">Parent Portal Account Setup</h2>
+                    <div class="wizard-steps">
+                        <div class="step-indicator active" id="step1-indicator">
+                            <div class="step-number">1</div>
+                            <div>Verification</div>
+                        </div>
+                        <div class="step-indicator" id="step2-indicator">
+                            <div class="step-number">2</div>
+                            <div>Account Setup</div>
+                        </div>
+                        <div class="step-indicator" id="step3-indicator">
+                            <div class="step-number">3</div>
+                            <div>Complete</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step-content">
+                    <!-- Step 1: Verification -->
+                    <div class="step-panel active" id="step1-panel">
+                        <h3>Identity Verification</h3>
+                        <p>To set up your parent portal account, you need to verify your identity using the temporary verification number provided by The Chosen Day Care.</p>
+                        
+                        <div class="verification-guide">
+                            <h4><i class="fas fa-info-circle"></i> Verification Code Format</h4>
+                            <p>Your verification code is generated from your child's information:</p>
+                            <div class="code-example">
+                                <strong>Format:</strong> YYYYMMDD + FirstName + LastName<br>
+                                <strong>Example:</strong> For "Emma Johnson" born on "2020-05-15"<br>
+                                <strong>Code:</strong> 20200515EmmaJohnson
+                            </div>
+                            <p><small>Note: Remove any spaces or special characters from the name.</small></p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="verificationCode">Enter Verification Code</label>
+                            <input type="text" id="verificationCode" placeholder="e.g., 20200515EmmaJohnson" required>
+                            <small class="help-text">This code was provided to you during enrollment.</small>
+                        </div>
+                        
+                        <div class="wizard-actions">
+                            <a href="index.html" class="btn btn-secondary">Cancel</a>
+                            <button class="btn btn-primary" onclick="verifyCode()">Verify & Continue</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Account Setup -->
+                    <div class="step-panel" id="step2-panel">
+                        <h3>Create Your Account</h3>
+                        <p>Please create your username and password for the parent portal.</p>
+                        
+                        <div class="form-group">
+                            <label for="parentName">Parent/Guardian Name</label>
+                            <input type="text" id="parentName" placeholder="Your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="parentEmail">Email Address</label>
+                            <input type="email" id="parentEmail" placeholder="your.email@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" placeholder="Choose a username" required>
+                            <small class="help-text">Minimum 5 characters, letters and numbers only.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" placeholder="Create a strong password" required>
+                            
+                            <div class="password-requirements">
+                                <h5>Password Requirements:</h5>
+                                <div class="requirement invalid" id="req-length">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 8 characters</span>
+                                </div>
+                                <div class="requirement invalid" id="req-uppercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One uppercase letter</span>
+                                </div>
+                                <div class="requirement invalid" id="req-lowercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One lowercase letter</span>
+                                </div>
+                                <div class="requirement invalid" id="req-number">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One number</span>
+                                </div>
+                                <div class="requirement invalid" id="req-special">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One special character</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter your password" required>
+                        </div>
+                        
+                        <div class="wizard-actions">
+                            <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+                            <button class="btn btn-primary" onclick="createAccount()">Create Account</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Complete -->
+                    <div class="step-panel" id="step3-panel">
+                        <div class="success-message">
+                            <div class="success-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Account Created Successfully!</h3>
+                            <p>Your parent portal account has been created. You can now log in using your credentials.</p>
+                            
+                            <div class="account-summary">
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: var(--border-radius); margin: 30px 0; text-align: left;">
+                                    <h4>Your Account Details:</h4>
+                                    <p><strong>Username:</strong> <span id="account-username"></span></p>
+                                    <p><strong>Email:</strong> <span id="account-email"></span></p>
+                                    <p><strong>Child:</strong> <span id="account-child"></span></p>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 30px;">
+                                <a href="login.html" class="btn btn-primary" style="margin-right: 15px;">
+                                    <i class="fas fa-sign-in-alt"></i> Go to Login
+                                </a>
+                                <a href="index.html" class="btn btn-secondary">
+                                    <i class="fas fa-home"></i> Return to Home
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="images/logo.png" alt="The Chosen Day Care Logo" height="50">
+                        <h3>THE CHOSEN DAY CARE</h3>
+                    </div>
+                    <p>Providing exceptional childcare services since 2010.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#programs">Programs</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Parent Resources</h4>
+                    <ul>
+                        <li><a href="login.html">Parent Portal Login</a></li>
+                        <li><a href="portal-setup.html">Set Up Portal Account</a></li>
+                        <li><a href="#">Parent Handbook</a></li>
+                        <li><a href="#">Calendar & Events</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Education Street</p>
+                    <p><i class="fas fa-phone"></i> (555) 123-4567</p>
+                    <p><i class="fas fa-envelope"></i> info@chosendaycare.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 The Chosen Day Care. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Portal Setup JavaScript
+        let currentStep = 1;
+        let verificationData = null;
+        
+        function goToStep(step) {
+            // Hide all panels
+            document.querySelectorAll('.step-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Update step indicators
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                indicator.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    indicator.classList.add('completed');
+                } else if (index + 1 === step) {
+                    indicator.classList.add('active');
+                }
+            });
+            
+            // Show current panel
+            document.getElementById(`step${step}-panel`).classList.add('active');
+            currentStep = step;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function verifyCode() {
+            const code = document.getElementById('verificationCode').value.trim();
+            
+            if (!code) {
+                alert('Please enter your verification code.');
+                return;
+            }
+            
+            // In production, this would verify against a database
+            // For demo, we'll simulate verification
+            
+            // Extract date and name from code
+            const datePart = code.substring(0, 8);
+            const namePart = code.substring(8);
+            
+            // Validate date format
+            if (!/^\d{8}$/.test(datePart)) {
+                alert('Invalid verification code format. Please check your code.');
+                return;
+            }
+            
+            // Check if code exists in localStorage (simulating database check)
+            const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+            
+            if (registeredChildren[code]) {
+                verificationData = registeredChildren[code];
+                goToStep(2);
+                
+                // Pre-fill parent name if available
+                if (verificationData.parentName) {
+                    document.getElementById('parentName').value = verificationData.parentName;
+                }
+            } else {
+                alert('Verification code not found. Please check your code or contact the daycare office.\n\nNote: This is a demo. In production, codes would be verified against the daycare database.');
+                
+                // For demo purposes, create a mock verification
+                verificationData = {
+                    childName: 'Demo Child',
+                    dob: '2020-01-01',
+                    parentName: 'Demo Parent'
+                };
+                goToStep(2);
+            }
+        }
+        
+        function validatePassword(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*]/.test(password)
+            };
+            
+            let allValid = true;
+            
+            for (const [key, isValid] of Object.entries(requirements)) {
+                const element = document.getElementById(`req-${key}`);
+                if (isValid) {
+                    element.classList.remove('invalid');
+                    element.classList.add('valid');
+                    element.querySelector('i').className = 'fas fa-check-circle';
+                } else {
+                    element.classList.remove('valid');
+                    element.classList.add('invalid');
+                    element.querySelector('i').className = 'fas fa-circle';
+                    allValid = false;
+                }
+            }
+            
+            return allValid;
+        }
+        
+        // Real-time password validation
+        document.getElementById('password').addEventListener('input', function() {
+            validatePassword(this.value);
+        });
+        
+        function createAccount() {
+            // Get form values
+            const name = document.getElementById('parentName').value.trim();
+            const email = document.getElementById('parentEmail').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (!name || !email || !username || !password || !confirmPassword) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            
+            if (!validatePassword(password)) {
+                alert('Please meet all password requirements.');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
+            
+            if (username.length < 5) {
+                alert('Username must be at least 5 characters long.');
+                return;
+            }
+            
+            // Check if username already exists
+            const accounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            if (accounts[username]) {
+                alert('Username already exists. Please choose a different one.');
+                return;
+            }
+            
+            // Create account object
+            const account = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                username: username,
+                password: btoa(password), // Note: In production, use proper hashing
+                verificationCode: document.getElementById('verificationCode').value.trim(),
+                childName: verificationData?.childName || 'Child',
+                createdAt: new Date().toISOString(),
+                lastLogin: null
+            };
+            
+            // Save to localStorage
+            accounts[username] = account;
+            localStorage.setItem('parentAccounts', JSON.stringify(accounts));
+            
+            // Display account info
+            document.getElementById('account-username').textContent = username;
+            document.getElementById('account-email').textContent = email;
+            document.getElementById('account-child').textContent = verificationData?.childName || 'Child';
+            
+            // Go to completion step
+            goToStep(3);
+        }
+        
+        // Initialize mobile menu
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
