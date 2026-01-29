@@ -1,3 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - The Chosen Day Care</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-login-container {
+            padding: 120px 0 80px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1d4a8a, #2a5ca7);
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-login-box {
+            max-width: 450px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        
+        .admin-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .admin-logo img {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .admin-login-icon {
+            font-size: 3rem;
+            color: #2a5ca7;
+            margin-bottom: 15px;
+        }
+        
+        .admin-login-header h2 {
+            color: #2a5ca7;
+            margin-bottom: 10px;
+        }
+        
+        .admin-login-header p {
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #2a5ca7;
+            box-shadow: 0 0 0 3px rgba(42, 92, 167, 0.1);
+        }
+        
+        .admin-login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2a5ca7, #1d4a8a);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .admin-login-btn:hover {
+            background: linear-gradient(135deg, #1d4a8a, #2a5ca7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 92, 167, 0.3);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        
+        .admin-login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .security-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="container">
+            <div class="admin-login-box">
+                <div class="admin-login-header">
+                    <div class="admin-logo">
+                        <img src="images/logo.png" alt="The Chosen Day Care Logo">
+                    </div>
+                    <div class="admin-login-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2>Administrator Portal</h2>
+                    <p>Daycare Management System</p>
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i> Invalid credentials. Please try again.
+                </div>
+                
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminUsername">Admin ID</label>
+                        <input type="text" id="adminUsername" placeholder="Enter admin ID" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="security-notice">
+                            <i class="fas fa-shield-alt"></i>
+                            <strong>Security Notice:</strong> This portal is for authorized staff only.
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="admin-login-btn">Login as Administrator</button>
+                </form>
+                
+                <div class="admin-login-footer">
+                    <p><a href="index.html" style="color: #2a5ca7; text-decoration: none;">← Return to Main Website</a></p>
+                    <p style="margin-top: 10px;">For technical support, contact IT department</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pre-configured admin accounts (in production, this would be on a server)
+        const adminAccounts = {
+            'admin': {
+                username: 'admin',
+                password: 'Admin@123', // Default password - should be changed
+                name: 'System Administrator',
+                role: 'superadmin',
+                permissions: ['all'],
+                lastLogin: null
+            },
+            'director': {
+                username: 'director',
+                password: 'Director@123',
+                name: 'Daycare Director',
+                role: 'director',
+                permissions: ['view_all', 'manage_staff', 'manage_children', 'view_financials'],
+                lastLogin: null
+            },
+            'staff': {
+                username: 'staff',
+                password: 'Staff@123',
+                name: 'Daycare Staff',
+                role: 'staff',
+                permissions: ['view_children', 'update_records', 'upload_documents'],
+                lastLogin: null
+            }
+        };
+
+        // Save admin accounts to localStorage (for demo)
+        localStorage.setItem('adminAccounts', JSON.stringify(adminAccounts));
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            const storedAdmins = JSON.parse(localStorage.getItem('adminAccounts') || '{}');
+            const adminAccount = storedAdmins[username];
+            
+            if (adminAccount && adminAccount.password === password) {
+                // Update last login
+                adminAccount.lastLogin = new Date().toISOString();
+                storedAdmins[username] = adminAccount;
+                localStorage.setItem('adminAccounts', JSON.stringify(storedAdmins));
+                
+                // Store session
+                sessionStorage.setItem('adminUser', JSON.stringify(adminAccount));
+                sessionStorage.setItem('isAdmin', 'true');
+                
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        });
+
+        // Auto-fill demo credentials for testing
+        window.addEventListener('load', function() {
+            const demoButton = document.createElement('button');
+            demoButton.innerHTML = '<i class="fas fa-vial"></i> Use Demo Credentials';
+            demoButton.type = 'button';
+            demoButton.className = 'btn btn-secondary';
+            demoButton.style.width = '100%';
+            demoButton.style.marginTop = '10px';
+            demoButton.style.padding = '12px';
+            demoButton.onclick = function() {
+                document.getElementById('adminUsername').value = 'admin';
+                document.getElementById('adminPassword').value = 'Admin@123';
+                alert('Demo credentials loaded:\nUsername: admin\nPassword: Admin@123\n\n⚠️ Change these in production!');
+            };
+            
+            const form = document.getElementById('adminLoginForm');
+            form.appendChild(demoButton);
+            
+            // Add demo info
+            const demoInfo = document.createElement('div');
+            demoInfo.className = 'security-notice';
+            demoInfo.innerHTML = '<strong>Demo Credentials:</strong><br>Admin: admin / Admin@123<br>Director: director / Director@123<br>Staff: staff / Staff@123';
+            demoInfo.style.marginTop = '15px';
+            demoInfo.style.fontSize = '0.8rem';
+            form.appendChild(demoInfo);
+        });
+    </script>
+</body>
+</html>
+
 <script>
     // SECURITY: Check if already logged in
     (function() {
