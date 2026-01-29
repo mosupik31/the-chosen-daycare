@@ -11,7 +11,6 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
 </head>
 <body>
-    <!-- Header -->
     <header class="main-header">
         <div class="container">
             <div class="logo">
@@ -39,7 +38,6 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="hero-content">
@@ -53,7 +51,6 @@
         </div>
     </section>
 
-    <!-- About Us Section -->
     <section id="about" class="section about-section">
         <div class="container">
             <h2 class="section-title">About The Chosen Day Care</h2>
@@ -91,7 +88,6 @@
         </div>
     </section>
 
-    <!-- Programs Section -->
     <section id="programs" class="section programs-section">
         <div class="container">
             <h2 class="section-title">Our Programs</h2>
@@ -135,7 +131,6 @@
         </div>
     </section>
 
-    <!-- Admissions Section -->
     <section id="admissions" class="section admissions-section">
         <div class="container">
             <h2 class="section-title">Admissions Process</h2>
@@ -175,7 +170,6 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
     <section id="contact" class="section contact-section">
         <div class="container">
             <h2 class="section-title">Contact Us</h2>
@@ -244,7 +238,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-grid">
@@ -297,53 +290,50 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 The Chosen Day Care. All rights reserved. | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a></p>
+                <p>&copy; 2024 The Chosen Day Care. All rights reserved.</p>
                 <p>Licensed Childcare Facility #CH-12345</p>
             </div>
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script src="script.js"></script>
     <script>
-        // Mobile menu toggle
         document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
             document.querySelector('.main-nav').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
         });
         
-        // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 if(this.getAttribute('href') === '#') return;
                 
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
-                if(targetId === '#') return;
-                
                 const targetElement = document.querySelector(targetId);
+                
                 if(targetElement) {
                     window.scrollTo({
                         top: targetElement.offsetTop - 80,
                         behavior: 'smooth'
                     });
                     
-                    // Close mobile menu if open
-                    document.querySelector('.main-nav').classList.remove('active');
+                    const mainNav = document.querySelector('.main-nav');
+                    if (mainNav && mainNav.classList.contains('active')) {
+                        mainNav.classList.remove('active');
+                        document.querySelector('.mobile-menu-btn').querySelector('i').classList.remove('fa-times');
+                        document.querySelector('.mobile-menu-btn').querySelector('i').classList.add('fa-bars');
+                    }
                 }
             });
         });
         
-        // Contact form submission
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // In production, this would send to a server
-            // For demo, we'll just show a success message
             alert('Thank you for your message! We will contact you within 24 hours.');
             this.reset();
         });
         
-        // Newsletter subscription
         document.getElementById('newsletterForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = this.querySelector('input[type="email"]').value;
