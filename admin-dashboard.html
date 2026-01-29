@@ -12,6 +12,76 @@
             min-height: 100vh;
             background-color: #f5f7fa;
         }
+        // ===================================================
+// SYNCHRONIZATION FIX - Add this at the TOP of your script
+// ===================================================
+function synchronizeCodes() {
+    console.log('🔗 Synchronizing admin and parent systems...');
+    
+    // Get codes from admin system
+    const adminCodes = demoData.verificationCodes || [];
+    
+    // Get or create parent system storage
+    let registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+    let parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+    
+    // Sync each code
+    adminCodes.forEach(code => {
+        if (code && code.code && code.childName) {
+            // Add to parent portal system
+            registeredChildren[code.code] = {
+                childName: code.childName,
+                dob: code.dob || '',
+                parentName: code.parentName || '',
+                parentEmail: code.parentEmail || '',
+                status: code.status || 'active',
+                adminId: code.id || code.code
+            };
+            
+            // Also create parent account if email exists
+            if (code.parentEmail && !parentAccounts[code.parentEmail]) {
+                parentAccounts[code.parentEmail] = {
+                    username: code.parentEmail,
+                    name: code.parentName || 'Parent',
+                    email: code.parentEmail,
+                    childName: code.childName,
+                    childDOB: code.dob || '',
+                    createdAt: code.generatedDate || new Date().toISOString(),
+                    status: 'active',
+                    verificationCode: code.code
+                };
+            }
+        }
+    });
+    
+    // Save synchronized data
+    localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
+    localStorage.setItem('parentAccounts', JSON.stringify(parentAccounts));
+    
+    console.log(`✅ Synced ${adminCodes.length} codes to parent system`);
+    return adminCodes.length;
+}
+
+// Call synchronization on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Your existing DOMContentLoaded code...
+    
+    // Add synchronization after a short delay
+    setTimeout(() => {
+        const syncedCount = synchronizeCodes();
+        if (syncedCount > 0) {
+            console.log(`🔗 ${syncedCount} verification codes synchronized`);
+        }
+    }, 1000);
+});
+
+// Also sync whenever a new code is generated
+function generateCode() {
+    // Your existing generateCode function...
+    
+    // After saving code, call:
+    synchronizeCodes();
+}
         
         .admin-header {
             background: white;
