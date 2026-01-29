@@ -1303,5 +1303,37 @@
             }
         }
     </script>
+    <script>
+// Debug script - add this before </body>
+(function() {
+    console.log('=== DEBUG POPUP ===');
+    
+    // 1. Check jQuery
+    console.log('jQuery version:', jQuery?.fn?.jquery || 'Not loaded');
+    
+    // 2. Check popup element
+    var popup = document.getElementById('parent-portal-popup');
+    console.log('Popup element:', popup);
+    
+    // 3. Check all elements with class containing "popup" or "modal"
+    var allPopups = document.querySelectorAll('[class*="popup"], [class*="modal"]');
+    console.log('All popup-like elements:', allPopups);
+    
+    // 4. Check if there are any event listeners on the trigger button
+    var triggerBtn = document.querySelector('[onclick*="parent"], [href*="parent"]');
+    console.log('Trigger button found:', triggerBtn);
+    
+    // 5. Try to manually create and show a popup
+    setTimeout(function() {
+        var testPopup = document.createElement('div');
+        testPopup.id = 'test-popup';
+        testPopup.innerHTML = '<h2>Test Popup</h2><p>If you see this, popup system works.</p>';
+        testPopup.style.cssText = 'position:fixed;top:20px;right:20px;background:green;color:white;padding:20px;z-index:99999;';
+        document.body.appendChild(testPopup);
+        console.log('Test popup added');
+    }, 1000);
+})();
+</script>
 </body>
+    
 </html>
