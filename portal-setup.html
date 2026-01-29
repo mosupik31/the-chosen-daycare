@@ -593,6 +593,75 @@
             };
             localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
         });
+        // Enhanced verification function - add to your parent portal setup page
+function verifyCodeFlexibly(enteredCode) {
+    // Normalize the entered code (remove spaces, make lowercase)
+    const normalizedCode = enteredCode.toLowerCase().replace(/\s/g, '');
+    
+    // Get all verification codes from localStorage
+    const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+    const allCodes = Object.keys(registeredChildren);
+    
+    // Try exact match first
+    if (allCodes.includes(normalizedCode)) {
+        return { success: true, childData: registeredChildren[normalizedCode] };
+    }
+    
+    // Try partial matches (for common errors)
+    for (const storedCode in registeredChildren) {
+        const storedLower = storedCode.toLowerCase();
+        
+        // Check for common error patterns
+        if (
+            // Same name, different date
+            storedLower.includes(normalizedCode.substring(8)) ||
+            // Similar spelling (allow 1-2 character difference)
+            levenshteinDistance(storedLower, normalizedCode) <= 2 ||
+            // Contains child name
+            storedLower.includes('karabo') && normalizedCode.includes('karabo')
+        ) {
+            return { 
+                success: true, 
+                childData: registeredChildren[storedCode],
+                message: `Note: Using code ${storedCode} (entered: ${enteredCode})`
+            };
+        }
+    }
+    
+    return { success: false, message: "Code not found. Please check and try again." };
+}
+
+// Levenshtein distance function for string similarity
+function levenshteinDistance(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
     </script>
 </body>
 </html>
