@@ -12,95 +12,34 @@
             min-height: 100vh;
             background-color: #f5f7fa;
         }
-        <!-- Add this to your verification section card -->
-<div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
-    <h4><i class="fas fa-sync-alt"></i> System Synchronization</h4>
-    <p>Ensure parent portal can access all verification codes.</p>
-    
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button class="btn btn-primary" onclick="synchronizeCodes()">
-            <i class="fas fa-sync"></i> Sync with Parent Portal
-        </button>
-        <button class="btn btn-secondary" onclick="checkSyncStatus()">
-            <i class="fas fa-search"></i> Check Sync Status
-        </button>
-        <button class="btn btn-success" onclick="exportAllCodes()">
-            <i class="fas fa-download"></i> Export All Codes
-        </button>
-    </div>
-    
-    <div id="syncStatus" style="margin-top: 10px; font-size: 0.9rem;"></div>
-</div>
-        // ===================================================
-// SYNCHRONIZATION FIX - Add this at the TOP of your script
-// ===================================================
-function synchronizeCodes() {
-    console.log('🔗 Synchronizing admin and parent systems...');
-    
-    // Get codes from admin system
-    const adminCodes = demoData.verificationCodes || [];
-    
-    // Get or create parent system storage
-    let registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
-    let parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    
-    // Sync each code
-    adminCodes.forEach(code => {
-        if (code && code.code && code.childName) {
-            // Add to parent portal system
-            registeredChildren[code.code] = {
-                childName: code.childName,
-                dob: code.dob || '',
-                parentName: code.parentName || '',
-                parentEmail: code.parentEmail || '',
-                status: code.status || 'active',
-                adminId: code.id || code.code
-            };
-            
-            // Also create parent account if email exists
-            if (code.parentEmail && !parentAccounts[code.parentEmail]) {
-                parentAccounts[code.parentEmail] = {
-                    username: code.parentEmail,
-                    name: code.parentName || 'Parent',
-                    email: code.parentEmail,
-                    childName: code.childName,
-                    childDOB: code.dob || '',
-                    createdAt: code.generatedDate || new Date().toISOString(),
-                    status: 'active',
-                    verificationCode: code.code
-                };
-            }
+        
+        /* System Synchronization Card */
+        .sync-card {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
-    });
-    
-    // Save synchronized data
-    localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
-    localStorage.setItem('parentAccounts', JSON.stringify(parentAccounts));
-    
-    console.log(`✅ Synced ${adminCodes.length} codes to parent system`);
-    return adminCodes.length;
-}
-
-// Call synchronization on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Your existing DOMContentLoaded code...
-    
-    // Add synchronization after a short delay
-    setTimeout(() => {
-        const syncedCount = synchronizeCodes();
-        if (syncedCount > 0) {
-            console.log(`🔗 ${syncedCount} verification codes synchronized`);
+        
+        .sync-card h4 {
+            color: #2a5ca7;
+            margin-bottom: 10px;
         }
-    }, 1000);
-});
-
-// Also sync whenever a new code is generated
-function generateCode() {
-    // Your existing generateCode function...
-    
-    // After saving code, call:
-    synchronizeCodes();
-}
+        
+        .sync-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .mismatch-fix-card {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
         
         .admin-header {
             background: white;
@@ -345,6 +284,27 @@ function generateCode() {
             max-width: 500px;
             width: 90%;
         }
+        
+        /* Parent Management Modal Styles */
+        .parent-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .parent-input:focus {
+            border-color: #2a5ca7;
+            outline: none;
+        }
+        
+        #newChildFields {
+            border-left: 3px solid #2a5ca7;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -457,6 +417,24 @@ function generateCode() {
                             <i class="fas fa-file-invoice-dollar" style="font-size: 2rem; color: #e63946;"></i>
                             <div class="stat-number" id="pendingPayments">0</div>
                             <p>Pending Payments</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0;">
+                        <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="openAddParentModal()">
+                                <i class="fas fa-user-plus"></i> Add Parent
+                            </button>
+                            <button class="btn btn-success" onclick="generateParentWithCode()">
+                                <i class="fas fa-qrcode"></i> Generate Code
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportParentsList()">
+                                <i class="fas fa-download"></i> Export Parents
+                            </button>
+                            <button class="btn btn-info" onclick="sendBulkEmails()">
+                                <i class="fas fa-mail-bulk"></i> Bulk Email
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -582,7 +560,72 @@ function generateCode() {
                         </button>
                     </div>
                     
-                    <p>Verification codes allow parents to create portal accounts.</p>
+                    <div style="margin-bottom: 30px;">
+                        <h4><i class="fas fa-user-plus"></i> Add New Parent with Portal Access</h4>
+                        <p>Generate a parent account along with verification code for instant portal access.</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                            <div style="background: #e8f4fd; padding: 20px; border-radius: 10px;">
+                                <h5><i class="fas fa-qrcode"></i> Quick Code Generation</h5>
+                                <button class="btn btn-primary" onclick="generateParentWithCode()" style="width: 100%; margin-top: 15px;">
+                                    <i class="fas fa-bolt"></i> Quick Generate Parent Code
+                                </button>
+                                <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                                    Auto-generates code with today's date
+                                </p>
+                            </div>
+                            
+                            <div style="background: #f0f8ff; padding: 20px; border-radius: 10px;">
+                                <h5><i class="fas fa-users"></i> Parent Management</h5>
+                                <button class="btn btn-success" onclick="openAddParentModal()" style="width: 100%; margin-top: 15px;">
+                                    <i class="fas fa-user-plus"></i> Add New Parent Account
+                                </button>
+                                <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                                    Create full parent account with portal access
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Synchronization Card -->
+                    <div class="sync-card">
+                        <h4><i class="fas fa-sync-alt"></i> System Synchronization</h4>
+                        <p>Ensure parent portal can access all verification codes.</p>
+                        
+                        <div class="sync-buttons">
+                            <button class="btn btn-primary" onclick="synchronizeCodes()">
+                                <i class="fas fa-sync"></i> Sync with Parent Portal
+                            </button>
+                            <button class="btn btn-secondary" onclick="checkSyncStatus()">
+                                <i class="fas fa-search"></i> Check Sync Status
+                            </button>
+                            <button class="btn btn-success" onclick="exportAllCodes()">
+                                <i class="fas fa-download"></i> Export All Codes
+                            </button>
+                        </div>
+                        
+                        <div id="syncStatus" style="margin-top: 10px; font-size: 0.9rem;"></div>
+                    </div>
+                    
+                    <!-- Mismatched Code Fix -->
+                    <div class="mismatch-fix-card">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Quick Fix for Mismatched Code</h4>
+                        <p>Parent entered: <code>20260120karabomosupi</code></p>
+                        <p>Expected format: <code>20060131karabomsupi</code></p>
+                        
+                        <div class="sync-buttons">
+                            <button class="btn btn-warning" onclick="fixMismatchedCode()">
+                                <i class="fas fa-magic"></i> Add Alternative Code
+                            </button>
+                            <button class="btn btn-info" onclick="acceptAlternativeCodeFormats()">
+                                <i class="fas fa-plus-circle"></i> Add All Variations
+                            </button>
+                            <button class="btn btn-primary" onclick="contactParentForCorrection()">
+                                <i class="fas fa-phone"></i> Contact Parent
+                            </button>
+                        </div>
+                    </div>
+                    
                     <p><strong>Format:</strong> YYYYMMDD + FirstName + LastName (no spaces)</p>
                     
                     <table class="data-table">
@@ -744,7 +787,21 @@ function generateCode() {
         </div>
     </div>
 
+    <!-- Add Parent Modal (will be created dynamically) -->
+
+    <script src="script.js"></script>
     <script>
+        // Main JavaScript for Admin Dashboard
+        // ===================================================
+        
+        let currentAdmin = null;
+        let demoData = {
+            children: [],
+            parents: [],
+            payments: [],
+            verificationCodes: []
+        };
+
         // SECURITY CHECK - Must be FIRST in the script
         (function() {
             const adminUser = JSON.parse(sessionStorage.getItem('adminUser') || '{}');
@@ -760,14 +817,6 @@ function generateCode() {
                 return;
             }
         })();
-
-        let currentAdmin = null;
-        let demoData = {
-            children: [],
-            parents: [],
-            payments: [],
-            verificationCodes: []
-        };
 
         document.addEventListener('DOMContentLoaded', function() {
             // Check if admin is logged in
@@ -842,6 +891,14 @@ function generateCode() {
             
             // Set session timeout
             startSessionTimer();
+            
+            // Synchronize codes on load
+            setTimeout(() => {
+                const syncedCount = synchronizeCodes();
+                if (syncedCount > 0) {
+                    console.log(`🔗 ${syncedCount} verification codes synchronized`);
+                }
+            }, 1000);
         });
 
         function getInitials(name) {
@@ -922,6 +979,189 @@ function generateCode() {
             localStorage.setItem('daycareAdminData', JSON.stringify(demoData));
         }
 
+        // SYNCHRONIZATION FUNCTIONS
+        // ===================================================
+        function synchronizeCodes() {
+            console.log('🔗 Synchronizing admin and parent systems...');
+            
+            // Get codes from admin system
+            const adminCodes = demoData.verificationCodes || [];
+            
+            // Get or create parent system storage
+            let registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+            let parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            
+            // Sync each code
+            adminCodes.forEach(code => {
+                if (code && code.code && code.childName) {
+                    // Add to parent portal system
+                    registeredChildren[code.code] = {
+                        childName: code.childName,
+                        dob: code.dob || '',
+                        parentName: code.parentName || '',
+                        parentEmail: code.parentEmail || '',
+                        status: code.status || 'active',
+                        adminId: code.id || code.code
+                    };
+                    
+                    // Also create parent account if email exists
+                    if (code.parentEmail && !parentAccounts[code.parentEmail]) {
+                        parentAccounts[code.parentEmail] = {
+                            username: code.parentEmail,
+                            name: code.parentName || 'Parent',
+                            email: code.parentEmail,
+                            childName: code.childName,
+                            childDOB: code.dob || '',
+                            createdAt: code.generatedDate || new Date().toISOString(),
+                            status: 'active',
+                            verificationCode: code.code
+                        };
+                    }
+                }
+            });
+            
+            // Save synchronized data
+            localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
+            localStorage.setItem('parentAccounts', JSON.stringify(parentAccounts));
+            
+            console.log(`✅ Synced ${adminCodes.length} codes to parent system`);
+            showNotification(`Synchronized ${adminCodes.length} verification codes with parent portal`);
+            return adminCodes.length;
+        }
+
+        function checkSyncStatus() {
+            const adminCodes = demoData.verificationCodes || [];
+            const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+            
+            let syncedCount = 0;
+            let missingCount = 0;
+            
+            adminCodes.forEach(code => {
+                if (registeredChildren[code.code]) {
+                    syncedCount++;
+                } else {
+                    missingCount++;
+                }
+            });
+            
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = `
+                <strong>Sync Status:</strong><br>
+                ✅ ${syncedCount} codes synchronized<br>
+                ⚠️ ${missingCount} codes not in parent system<br>
+                📊 Total codes in admin system: ${adminCodes.length}
+            `;
+            
+            if (missingCount > 0) {
+                statusDiv.style.color = '#dc3545';
+            } else {
+                statusDiv.style.color = '#28a745';
+            }
+        }
+
+        function exportAllCodes() {
+            const adminCodes = demoData.verificationCodes || [];
+            const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+            
+            const exportData = {
+                adminCodes: adminCodes,
+                parentSystemCodes: Object.keys(registeredChildren),
+                generatedAt: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `verification-codes-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('All verification codes exported!');
+        }
+
+        // MISMATCHED CODE FIX FUNCTIONS
+        // ===================================================
+        function fixMismatchedCode() {
+            const correctCode = "20060131karabomsupi";
+            const incorrectCode = "20260120karabomosupi";
+            
+            // Add the incorrect code to your system
+            const verificationCode = {
+                code: incorrectCode,
+                childName: "karabo msupi",
+                dob: "2006-01-31",
+                parentName: "leah",
+                generatedDate: new Date().toISOString().split('T')[0],
+                status: 'active'
+            };
+            
+            // Check if code already exists
+            const existingCode = demoData.verificationCodes.find(c => c.code === incorrectCode);
+            
+            if (!existingCode) {
+                demoData.verificationCodes.push(verificationCode);
+                saveDemoData();
+                renderVerificationTable();
+                showNotification(`Added alternative code: ${incorrectCode}`);
+                addActivity(`Added alternative code for karabo msupi`);
+                
+                // Also sync to parent system
+                synchronizeCodes();
+            }
+        }
+
+        function acceptAlternativeCodeFormats() {
+            const childName = "karabo msupi";
+            const dob = "2006-01-31";
+            
+            // Generate common alternative formats
+            const alternatives = [
+                // Original format
+                `20060131${childName.replace(/\s/g, '')}`,
+                // Common misspellings
+                `20060131karabomosupi`, // With extra 'o'
+                `20060131karabomsuppi`, // With extra 'p'
+                `20060131karabo`, // Short version
+                // Date variations
+                `20060120${childName.replace(/\s/g, '')}`, // Wrong day
+                `20260131${childName.replace(/\s/g, '')}`, // Wrong year
+                `20260120${childName.replace(/\s/g, '')}`, // Both wrong
+            ];
+            
+            let addedCount = 0;
+            alternatives.forEach(code => {
+                const existing = demoData.verificationCodes.find(c => c.code === code);
+                if (!existing) {
+                    demoData.verificationCodes.push({
+                        code: code,
+                        childName: childName,
+                        dob: dob,
+                        parentName: "leah",
+                        generatedDate: new Date().toISOString().split('T')[0],
+                        status: 'active'
+                    });
+                    addedCount++;
+                }
+            });
+            
+            saveDemoData();
+            renderVerificationTable();
+            showNotification(`Added ${addedCount} alternative code formats`);
+            
+            // Sync to parent system
+            synchronizeCodes();
+        }
+
+        function contactParentForCorrection() {
+            showNotification('Please contact parent at (555) 123-4567 to verify correct code');
+            // In a real system, this would open an email or call dialog
+        }
+
+        // REST OF THE FUNCTIONS (from your original code)
+        // ===================================================
         function updateDashboardStats() {
             document.getElementById('totalChildren').textContent = demoData.children.length;
             document.getElementById('totalParents').textContent = demoData.parents.length;
@@ -959,7 +1199,7 @@ function generateCode() {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${child.firstName} ${child.lastName}</td>
-                    <td>${formatDate(child.dob)}</td>
+                    <td>formatDate(child.dob)</td>
                     <td>${child.parentName}</td>
                     <td>${getRoomName(child.room)}</td>
                     <td><span class="badge badge-${child.status}">${child.status}</span></td>
@@ -985,11 +1225,59 @@ function generateCode() {
             const table = document.getElementById('parentsTable');
             table.innerHTML = '';
             
-            // Get parents from localStorage (parent accounts)
-            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            // Get all parents from various sources
+            const allParents = [];
             
+            // 1. From demoData (newly added parents)
+            if (demoData.parents && demoData.parents.length > 0) {
+                demoData.parents.forEach(parent => {
+                    allParents.push({
+                        source: 'demo',
+                        data: parent
+                    });
+                });
+            }
+            
+            // 2. From localStorage (existing parent accounts)
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
             Object.values(parentAccounts).forEach(parent => {
+                allParents.push({
+                    source: 'localStorage',
+                    data: parent
+                });
+            });
+            
+            // 3. From children data (parents mentioned in child records)
+            demoData.children.forEach(child => {
+                const parentName = child.parentName;
+                const parentEmail = child.parentEmail;
+                const parentPhone = child.parentPhone;
+                
+                if (parentName && !allParents.find(p => p.data.email === parentEmail)) {
+                    allParents.push({
+                        source: 'child',
+                        data: {
+                            name: parentName,
+                            email: parentEmail || 'N/A',
+                            phone: parentPhone || 'N/A',
+                            childName: `${child.firstName} ${child.lastName}`,
+                            createdAt: child.startDate || new Date().toISOString(),
+                            status: 'active'
+                        }
+                    });
+                }
+            });
+            
+            // Sort by creation date (newest first)
+            allParents.sort((a, b) => {
+                return new Date(b.data.createdAt) - new Date(a.data.createdAt);
+            });
+            
+            // Render table rows
+            allParents.forEach((parentObj, index) => {
+                const parent = parentObj.data;
                 const row = document.createElement('tr');
+                
                 row.innerHTML = `
                     <td>${parent.name || 'N/A'}</td>
                     <td>${parent.email || 'N/A'}</td>
@@ -1002,12 +1290,16 @@ function generateCode() {
                             <button class="btn btn-primary btn-sm" onclick="contactParent('${parent.email}')">
                                 <i class="fas fa-envelope"></i>
                             </button>
-                            <button class="btn btn-secondary btn-sm" onclick="viewParent('${parent.username}')">
+                            <button class="btn btn-secondary btn-sm" onclick="viewParentDetails(${index})">
                                 <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="generateNewCodeForParent('${parent.email}')">
+                                <i class="fas fa-key"></i>
                             </button>
                         </div>
                     </td>
                 `;
+                
                 table.appendChild(row);
             });
         }
@@ -1095,28 +1387,12 @@ function generateCode() {
             updateDashboardStats();
             closeModal('addChildModal');
             showNotification('Child added successfully!');
-
-            <!-- Add this to your verification section card -->
-<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;">
-    <h4><i class="fas fa-exclamation-triangle"></i> Quick Fix for Mismatched Code</h4>
-    <p>Parent entered: <code>20260120karabomosupi</code></p>
-    <p>Expected format: <code>20060131karabomsupi</code></p>
-    
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button class="btn btn-warning" onclick="fixMismatchedCode()">
-            <i class="fas fa-magic"></i> Add Alternative Code
-        </button>
-        <button class="btn btn-info" onclick="acceptAlternativeCodeFormats()">
-            <i class="fas fa-plus-circle"></i> Add All Variations
-        </button>
-        <button class="btn btn-primary" onclick="contactParentForCorrection()">
-            <i class="fas fa-phone"></i> Contact Parent
-        </button>
-    </div>
-</div>
             
             // Add to recent activity
             addActivity(`Added new child: ${child.firstName} ${child.lastName}`);
+            
+            // Sync verification codes if needed
+            synchronizeCodes();
         }
 
         function openVerificationModal() {
@@ -1160,15 +1436,6 @@ function generateCode() {
             demoData.verificationCodes.push(verificationCode);
             saveDemoData();
             
-            // Also save to registered children for parent portal verification
-            const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
-            registeredChildren[code] = {
-                childName: `${firstName} ${lastName}`,
-                dob: dob,
-                parentName: parentName
-            };
-            localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
-            
             // Display the code
             document.getElementById('generatedCodeDisplay').textContent = code;
             document.getElementById('generatedCodeInfo').textContent = 
@@ -1179,13 +1446,496 @@ function generateCode() {
             
             showNotification('Verification code generated!');
             addActivity(`Generated verification code for ${firstName} ${lastName}`);
+            
+            // Sync to parent system
+            synchronizeCodes();
         }
 
+        // PARENT MANAGEMENT FUNCTIONS
+        // ===================================================
+        function openAddParentModal() {
+            // Create and show the parent addition modal
+            const modalHTML = `
+                <div id="addParentModal" class="modal" style="display: flex;">
+                    <div class="modal-content" style="max-width: 700px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3><i class="fas fa-user-plus"></i> Add New Parent Account</h3>
+                            <button onclick="closeParentModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div>
+                                <h4><i class="fas fa-user"></i> Parent Information</h4>
+                                <div class="form-group">
+                                    <label>First Name *</label>
+                                    <input type="text" id="pFirstName" class="parent-input" placeholder="Parent's first name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name *</label>
+                                    <input type="text" id="pLastName" class="parent-input" placeholder="Parent's last name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="pEmail" class="parent-input" placeholder="parent@email.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="pPhone" class="parent-input" placeholder="(123) 456-7890">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4><i class="fas fa-child"></i> Child Information</h4>
+                                <div class="form-group">
+                                    <label>Link to Existing Child</label>
+                                    <select id="pChildSelect" class="parent-input" onchange="updateChildInfo()">
+                                        <option value="">Select existing child...</option>
+                                    </select>
+                                </div>
+                                <div id="newChildFields">
+                                    <div class="form-group">
+                                        <label>Child First Name</label>
+                                        <input type="text" id="pChildFirst" class="parent-input" placeholder="Child's first name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Child Last Name</label>
+                                        <input type="text" id="pChildLast" class="parent-input" placeholder="Child's last name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Child Date of Birth</label>
+                                        <input type="date" id="pChildDOB" class="parent-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Relationship *</label>
+                                    <select id="pRelationship" class="parent-input" required>
+                                        <option value="">Select relationship</option>
+                                        <option value="mother">Mother</option>
+                                        <option value="father">Father</option>
+                                        <option value="guardian">Guardian</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <h4><i class="fas fa-key"></i> Portal Access</h4>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                <input type="checkbox" id="pGenerateCode" checked>
+                                <label for="pGenerateCode">Generate portal access code</label>
+                            </div>
+                            <div id="codePreview" style="margin-top: 15px; display: none;">
+                                <label>Generated Code Preview:</label>
+                                <div style="background: white; padding: 10px; border-radius: 5px; font-family: monospace; font-weight: bold; color: #2a5ca7;">
+                                    <span id="previewCodeText">XXXX-XXXX-XXXX</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="saveNewParent()" style="flex: 1;">
+                                <i class="fas fa-save"></i> Save Parent & Generate Code
+                            </button>
+                            <button class="btn btn-secondary" onclick="closeParentModal()" style="flex: 1;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to body
+            const modalDiv = document.createElement('div');
+            modalDiv.innerHTML = modalHTML;
+            document.body.appendChild(modalDiv);
+            
+            // Load existing children
+            loadChildrenForParent();
+            
+            // Update code preview as user types
+            document.querySelectorAll('.parent-input').forEach(input => {
+                input.addEventListener('input', updateCodePreview);
+            });
+        }
+
+        function loadChildrenForParent() {
+            const select = document.getElementById('pChildSelect');
+            const demoChildren = demoData.children || [];
+            
+            // Clear existing options except first
+            select.innerHTML = '<option value="">Select existing child...</option>';
+            
+            // Add children from demo data
+            demoChildren.forEach(child => {
+                const option = document.createElement('option');
+                option.value = child.id;
+                option.textContent = `${child.firstName} ${child.lastName} (${formatDate(child.dob)})`;
+                select.appendChild(option);
+            });
+            
+            // Add option for new child
+            const newOption = document.createElement('option');
+            newOption.value = 'new';
+            newOption.textContent = '+ Add New Child';
+            select.appendChild(newOption);
+        }
+
+        function updateChildInfo() {
+            const select = document.getElementById('pChildSelect');
+            const newChildFields = document.getElementById('newChildFields');
+            
+            if (select.value === 'new') {
+                newChildFields.style.display = 'block';
+                // Clear child fields
+                document.getElementById('pChildFirst').value = '';
+                document.getElementById('pChildLast').value = '';
+                document.getElementById('pChildDOB').value = '';
+            } else if (select.value) {
+                newChildFields.style.display = 'none';
+                // Auto-fill parent name from selected child
+                const child = demoData.children.find(c => c.id == select.value);
+                if (child) {
+                    document.getElementById('pChildFirst').value = child.firstName;
+                    document.getElementById('pChildLast').value = child.lastName;
+                    document.getElementById('pChildDOB').value = child.dob;
+                }
+            } else {
+                newChildFields.style.display = 'block';
+            }
+            
+            updateCodePreview();
+        }
+
+        function updateCodePreview() {
+            const firstName = document.getElementById('pFirstName').value || 'Parent';
+            const lastName = document.getElementById('pLastName').value || 'Name';
+            const generateCode = document.getElementById('pGenerateCode').checked;
+            const previewDiv = document.getElementById('codePreview');
+            
+            if (generateCode) {
+                previewDiv.style.display = 'block';
+                // Generate preview code
+                const date = new Date();
+                const dateStr = date.getFullYear().toString().slice(-2) + 
+                               (date.getMonth() + 1).toString().padStart(2, '0') + 
+                               date.getDate().toString().padStart(2, '0');
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                const random = Math.floor(Math.random() * 9000 + 1000);
+                
+                const previewCode = `PAR-${dateStr}-${initials}-${random}`;
+                document.getElementById('previewCodeText').textContent = previewCode;
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        }
+
+        function generateParentWithCode() {
+            // Quick generation function
+            const today = new Date();
+            const dateStr = today.getFullYear() + 
+                           (today.getMonth() + 1).toString().padStart(2, '0') + 
+                           today.getDate().toString().padStart(2, '0');
+            
+            const children = demoData.children || [];
+            if (children.length === 0) {
+                alert('Please add children first before generating parent codes.');
+                return;
+            }
+            
+            const randomChild = children[Math.floor(Math.random() * children.length)];
+            const childName = `${randomChild.firstName} ${randomChild.lastName}`;
+            
+            // Generate the code
+            const code = `${dateStr}${randomChild.firstName}${randomChild.lastName}`.replace(/\s/g, '');
+            
+            // Add to verification codes
+            const verificationCode = {
+                code: code,
+                childName: childName,
+                dob: randomChild.dob,
+                parentName: 'Auto-Generated',
+                generatedDate: today.toISOString().split('T')[0],
+                status: 'active'
+            };
+            
+            demoData.verificationCodes.push(verificationCode);
+            saveDemoData();
+            
+            // Show the code
+            showGeneratedCode(code, childName, randomChild.dob);
+            
+            showNotification('Parent verification code generated!');
+            addActivity(`Generated quick parent code for ${childName}`);
+            renderVerificationTable();
+            
+            // Sync to parent system
+            synchronizeCodes();
+        }
+
+        function saveNewParent() {
+            // Get form values
+            const firstName = document.getElementById('pFirstName').value.trim();
+            const lastName = document.getElementById('pLastName').value.trim();
+            const email = document.getElementById('pEmail').value.trim();
+            const phone = document.getElementById('pPhone').value.trim();
+            const relationship = document.getElementById('pRelationship').value;
+            const generateCode = document.getElementById('pGenerateCode').checked;
+            
+            // Validation
+            if (!firstName || !lastName || !email || !relationship) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Get child info
+            const childSelect = document.getElementById('pChildSelect').value;
+            let childFirstName = '';
+            let childLastName = '';
+            let childDOB = '';
+            
+            if (childSelect === 'new') {
+                childFirstName = document.getElementById('pChildFirst').value.trim();
+                childLastName = document.getElementById('pChildLast').value.trim();
+                childDOB = document.getElementById('pChildDOB').value;
+            } else if (childSelect) {
+                const child = demoData.children.find(c => c.id == childSelect);
+                if (child) {
+                    childFirstName = child.firstName;
+                    childLastName = child.lastName;
+                    childDOB = child.dob;
+                }
+            }
+            
+            // Create parent object
+            const parent = {
+                id: Date.now(),
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                relationship: relationship,
+                childName: childFirstName && childLastName ? `${childFirstName} ${childLastName}` : 'Not specified',
+                childDOB: childDOB,
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                portalAccess: generateCode ? 'pending' : 'none'
+            };
+            
+            // Save to demo data
+            if (!demoData.parents) demoData.parents = [];
+            demoData.parents.push(parent);
+            
+            // Save to localStorage for parent portal
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            parentAccounts[email] = {
+                username: email,
+                name: `${firstName} ${lastName}`,
+                email: email,
+                phone: phone,
+                relationship: relationship,
+                childName: parent.childName,
+                childDOB: childDOB,
+                createdAt: new Date().toISOString(),
+                status: 'active'
+            };
+            localStorage.setItem('parentAccounts', JSON.stringify(parentAccounts));
+            
+            // Generate verification code if requested
+            if (generateCode && childFirstName && childLastName && childDOB) {
+                const dateObj = new Date(childDOB);
+                const yyyy = dateObj.getFullYear();
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                const code = `${yyyy}${mm}${dd}${childFirstName}${childLastName}`.replace(/\s/g, '');
+                
+                const verificationCode = {
+                    code: code,
+                    childName: `${childFirstName} ${childLastName}`,
+                    dob: childDOB,
+                    parentName: `${firstName} ${lastName}`,
+                    parentEmail: email,
+                    generatedDate: new Date().toISOString().split('T')[0],
+                    status: 'active'
+                };
+                
+                demoData.verificationCodes.push(verificationCode);
+                
+                // Also register child for portal access
+                const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+                registeredChildren[code] = {
+                    childName: `${childFirstName} ${childLastName}`,
+                    dob: childDOB,
+                    parentName: `${firstName} ${lastName}`,
+                    parentEmail: email
+                };
+                localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
+                
+                // Show the generated code
+                showGeneratedCode(code, `${childFirstName} ${childLastName}`, childDOB, `${firstName} ${lastName}`);
+            }
+            
+            // Save all data
+            saveDemoData();
+            
+            // Update UI
+            closeParentModal();
+            renderParentsTable();
+            updateDashboardStats();
+            if (generateCode) {
+                renderVerificationTable();
+            }
+            
+            showNotification('Parent account created successfully!');
+            addActivity(`Added new parent: ${firstName} ${lastName}`);
+        }
+
+        function showGeneratedCode(code, childName, childDOB, parentName = 'Parent') {
+            const modalHTML = `
+                <div id="parentCodeModal" class="modal" style="display: flex;">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 4rem; color: #2a5ca7; margin-bottom: 20px;">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <h3>Parent Portal Access Created!</h3>
+                            <p>Account has been created and portal access code generated.</p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #2a5ca7, #1d4a8a); color: white; padding: 25px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                            <h4 style="margin-bottom: 15px;"><i class="fas fa-user-shield"></i> Portal Access Code</h4>
+                            <div id="finalGeneratedCode" style="font-family: monospace; font-size: 2rem; font-weight: bold; letter-spacing: 2px; margin: 15px 0; word-break: break-all;">
+                                ${code}
+                            </div>
+                            <p style="opacity: 0.9; font-size: 0.9rem;">
+                                For ${childName}, born ${formatDate(childDOB)}
+                            </p>
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h5><i class="fas fa-info-circle"></i> Next Steps</h5>
+                            <ol style="text-align: left; margin: 10px 0 0 20px;">
+                                <li>Share this code with ${parentName}</li>
+                                <li>Parent should visit the portal setup page</li>
+                                <li>Enter this code to create their account</li>
+                                <li>They will receive login credentials via email</li>
+                            </ol>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="copyParentCode()">
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                            <button class="btn btn-secondary" onclick="emailParentCode('${code}', '${parentName}', '${childName}')">
+                                <i class="fas fa-envelope"></i> Email to Parent
+                            </button>
+                            <button class="btn btn-success" onclick="printParentInstructions('${code}', '${childName}')" style="grid-column: span 2;">
+                                <i class="fas fa-print"></i> Print Instructions
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-secondary" onclick="closeParentCodeModal()" style="width: 100%; margin-top: 15px;">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Remove any existing modal
+            const existingModal = document.getElementById('parentCodeModal');
+            if (existingModal) existingModal.remove();
+            
+            // Add new modal
+            const modalDiv = document.createElement('div');
+            modalDiv.innerHTML = modalHTML;
+            document.body.appendChild(modalDiv);
+        }
+
+        function closeParentModal() {
+            const modal = document.getElementById('addParentModal');
+            if (modal) modal.remove();
+        }
+
+        function closeParentCodeModal() {
+            const modal = document.getElementById('parentCodeModal');
+            if (modal) modal.remove();
+        }
+
+        // UTILITY FUNCTIONS
+        // ===================================================
         function copyToClipboard() {
             const code = document.getElementById('generatedCodeDisplay').textContent;
             navigator.clipboard.writeText(code).then(() => {
                 showNotification('Code copied to clipboard!');
             });
+        }
+
+        function copyParentCode() {
+            const code = document.getElementById('finalGeneratedCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard!');
+            });
+        }
+
+        function emailParentCode(code, parentName, childName) {
+            // Simulate sending email
+            showNotification(`Email sent to ${parentName} with portal access code`);
+            
+            // Log for debugging
+            console.log(`Emailing code ${code} to parent of ${childName}`);
+        }
+
+        function printParentInstructions(code, childName) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Parent Portal Instructions - ${childName}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .code { font-size: 24px; font-weight: bold; color: #2a5ca7; padding: 15px; 
+                                    border: 2px dashed #2a5ca7; text-align: center; margin: 20px 0; 
+                                    font-family: monospace; }
+                            .instructions { background: #f8f9fa; padding: 20px; border-radius: 5px; }
+                            .step { margin-bottom: 15px; }
+                            .footer { margin-top: 40px; font-size: 0.9em; color: #666; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>Parent Portal Access</h1>
+                            <h3>For ${childName}</h3>
+                        </div>
+                        
+                        <div class="code">${code}</div>
+                        
+                        <div class="instructions">
+                            <h3>Setup Instructions:</h3>
+                            <div class="step"><strong>Step 1:</strong> Go to: yourdaycare.com/parent-portal</div>
+                            <div class="step"><strong>Step 2:</strong> Click "First Time Setup"</div>
+                            <div class="step"><strong>Step 3:</strong> Enter the code above exactly as shown</div>
+                            <div class="step"><strong>Step 4:</strong> Create your account with email and password</div>
+                            <div class="step"><strong>Step 5:</strong> Check your email for confirmation</div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p><strong>Important:</strong> This code is unique to your child. Do not share with others.</p>
+                            <p>If you have questions, contact: admin@thechosendaycare.com</p>
+                            <p>Generated: ${new Date().toLocaleDateString()}</p>
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
         }
 
         function closeModal(modalId) {
@@ -1218,12 +1968,16 @@ function generateCode() {
 
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } catch (e) {
+                return dateString;
+            }
         }
 
         function getRoomName(roomCode) {
@@ -1374,7 +2128,7 @@ function generateCode() {
             window.location.href = `mailto:${email}`;
         }
 
-        function viewParent(username) {
+        function viewParentDetails(index) {
             showNotification('Viewing parent details...');
         }
 
@@ -1410,852 +2164,118 @@ function generateCode() {
                 addActivity('Deleted a verification code');
             }
         }
-    </script>
-    <script>
-// Debug script - add this before </body>
-(function() {
-    console.log('=== DEBUG POPUP ===');
-    
-    // 1. Check jQuery
-    console.log('jQuery version:', jQuery?.fn?.jquery || 'Not loaded');
-    
-    // 2. Check popup element
-    var popup = document.getElementById('parent-portal-popup');
-    console.log('Popup element:', popup);
-    
-    // 3. Check all elements with class containing "popup" or "modal"
-    var allPopups = document.querySelectorAll('[class*="popup"], [class*="modal"]');
-    console.log('All popup-like elements:', allPopups);
-    
-    // 4. Check if there are any event listeners on the trigger button
-    var triggerBtn = document.querySelector('[onclick*="parent"], [href*="parent"]');
-    console.log('Trigger button found:', triggerBtn);
-    
-    // 5. Try to manually create and show a popup
-    setTimeout(function() {
-        var testPopup = document.createElement('div');
-        testPopup.id = 'test-popup';
-        testPopup.innerHTML = '<h2>Test Popup</h2><p>If you see this, popup system works.</p>';
-        testPopup.style.cssText = 'position:fixed;top:20px;right:20px;background:green;color:white;padding:20px;z-index:99999;';
-        document.body.appendChild(testPopup);
-        console.log('Test popup added');
-    }, 1000);
-})();
 
-        <!-- Add this script after your existing script but before </body> -->
-
-<script>
-// ===================================================
-// ENHANCED PARENT MANAGEMENT SYSTEM
-// ===================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Add Parent Portal Code Generation to Verification Section
-    enhanceVerificationSection();
-});
-
-function enhanceVerificationSection() {
-    // Get the verification section button and modify it
-    const verificationBtn = document.querySelector('[data-section="verification"]');
-    const verificationCard = document.querySelector('#verification .admin-card');
-    
-    if (verificationBtn && verificationCard) {
-        // Add new functionality to the verification section
-        const html = `
-            <div style="margin-bottom: 30px;">
-                <h4><i class="fas fa-user-plus"></i> Add New Parent with Portal Access</h4>
-                <p>Generate a parent account along with verification code for instant portal access.</p>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
-                    <div style="background: #e8f4fd; padding: 20px; border-radius: 10px;">
-                        <h5><i class="fas fa-qrcode"></i> Quick Code Generation</h5>
-                        <button class="btn btn-primary" onclick="generateParentWithCode()" style="width: 100%; margin-top: 15px;">
-                            <i class="fas fa-bolt"></i> Quick Generate Parent Code
-                        </button>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-                            Auto-generates code with today's date
-                        </p>
-                    </div>
-                    
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 10px;">
-                        <h5><i class="fas fa-users"></i> Parent Management</h5>
-                        <button class="btn btn-success" onclick="openAddParentModal()" style="width: 100%; margin-top: 15px;">
-                            <i class="fas fa-user-plus"></i> Add New Parent Account
-                        </button>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-                            Create full parent account with portal access
-                        </p>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const existingContent = verificationCard.innerHTML;
-        verificationCard.innerHTML = html + existingContent;
-    }
-}
-
-// ===================================================
-// PARENT MANAGEMENT FUNCTIONS
-// ===================================================
-
-function openAddParentModal() {
-    // Create and show the parent addition modal
-    const modalHTML = `
-        <div id="addParentModal" class="modal" style="display: flex;">
-            <div class="modal-content" style="max-width: 700px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3><i class="fas fa-user-plus"></i> Add New Parent Account</h3>
-                    <button onclick="closeParentModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <h4><i class="fas fa-user"></i> Parent Information</h4>
-                        <div class="form-group">
-                            <label>First Name *</label>
-                            <input type="text" id="pFirstName" class="parent-input" placeholder="Parent's first name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Last Name *</label>
-                            <input type="text" id="pLastName" class="parent-input" placeholder="Parent's last name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email *</label>
-                            <input type="email" id="pEmail" class="parent-input" placeholder="parent@email.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" id="pPhone" class="parent-input" placeholder="(123) 456-7890">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h4><i class="fas fa-child"></i> Child Information</h4>
-                        <div class="form-group">
-                            <label>Link to Existing Child</label>
-                            <select id="pChildSelect" class="parent-input" onchange="updateChildInfo()">
-                                <option value="">Select existing child...</option>
-                            </select>
-                        </div>
-                        <div id="newChildFields">
-                            <div class="form-group">
-                                <label>Child First Name</label>
-                                <input type="text" id="pChildFirst" class="parent-input" placeholder="Child's first name">
-                            </div>
-                            <div class="form-group">
-                                <label>Child Last Name</label>
-                                <input type="text" id="pChildLast" class="parent-input" placeholder="Child's last name">
-                            </div>
-                            <div class="form-group">
-                                <label>Child Date of Birth</label>
-                                <input type="date" id="pChildDOB" class="parent-input">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Relationship *</label>
-                            <select id="pRelationship" class="parent-input" required>
-                                <option value="">Select relationship</option>
-                                <option value="mother">Mother</option>
-                                <option value="father">Father</option>
-                                <option value="guardian">Guardian</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h4><i class="fas fa-key"></i> Portal Access</h4>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-                        <input type="checkbox" id="pGenerateCode" checked>
-                        <label for="pGenerateCode">Generate portal access code</label>
-                    </div>
-                    <div id="codePreview" style="margin-top: 15px; display: none;">
-                        <label>Generated Code Preview:</label>
-                        <div style="background: white; padding: 10px; border-radius: 5px; font-family: monospace; font-weight: bold; color: #2a5ca7;">
-                            <span id="previewCodeText">XXXX-XXXX-XXXX</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="saveNewParent()" style="flex: 1;">
-                        <i class="fas fa-save"></i> Save Parent & Generate Code
-                    </button>
-                    <button class="btn btn-secondary" onclick="closeParentModal()" style="flex: 1;">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add modal to body
-    const modalDiv = document.createElement('div');
-    modalDiv.innerHTML = modalHTML;
-    document.body.appendChild(modalDiv);
-    
-    // Load existing children
-    loadChildrenForParent();
-    
-    // Update code preview as user types
-    document.querySelectorAll('.parent-input').forEach(input => {
-        input.addEventListener('input', updateCodePreview);
-    });
-}
-
-function loadChildrenForParent() {
-    const select = document.getElementById('pChildSelect');
-    const demoChildren = demoData.children || [];
-    
-    // Clear existing options except first
-    select.innerHTML = '<option value="">Select existing child...</option>';
-    
-    // Add children from demo data
-    demoChildren.forEach(child => {
-        const option = document.createElement('option');
-        option.value = child.id;
-        option.textContent = `${child.firstName} ${child.lastName} (${formatDate(child.dob)})`;
-        select.appendChild(option);
-    });
-    
-    // Add option for new child
-    const newOption = document.createElement('option');
-    newOption.value = 'new';
-    newOption.textContent = '+ Add New Child';
-    select.appendChild(newOption);
-}
-
-function updateChildInfo() {
-    const select = document.getElementById('pChildSelect');
-    const newChildFields = document.getElementById('newChildFields');
-    
-    if (select.value === 'new') {
-        newChildFields.style.display = 'block';
-        // Clear child fields
-        document.getElementById('pChildFirst').value = '';
-        document.getElementById('pChildLast').value = '';
-        document.getElementById('pChildDOB').value = '';
-    } else if (select.value) {
-        newChildFields.style.display = 'none';
-        // Auto-fill parent name from selected child
-        const child = demoData.children.find(c => c.id == select.value);
-        if (child) {
-            document.getElementById('pChildFirst').value = child.firstName;
-            document.getElementById('pChildLast').value = child.lastName;
-            document.getElementById('pChildDOB').value = child.dob;
+        function generateNewCodeForParent(email) {
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            const parent = parentAccounts[email];
+            
+            if (!parent) {
+                alert('Parent not found!');
+                return;
+            }
+            
+            const childName = parent.childName;
+            const childDOB = parent.childDOB;
+            
+            if (!childName || !childDOB) {
+                alert('Child information missing. Cannot generate code.');
+                return;
+            }
+            
+            // Extract child first and last name
+            const nameParts = childName.split(' ');
+            const childFirstName = nameParts[0];
+            const childLastName = nameParts.slice(1).join('');
+            
+            // Generate code
+            const dateObj = new Date(childDOB);
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            const code = `${yyyy}${mm}${dd}${childFirstName}${childLastName}`.replace(/\s/g, '');
+            
+            // Add to verification codes
+            const verificationCode = {
+                code: code,
+                childName: childName,
+                dob: childDOB,
+                parentName: parent.name,
+                parentEmail: email,
+                generatedDate: new Date().toISOString().split('T')[0],
+                status: 'active'
+            };
+            
+            demoData.verificationCodes.push(verificationCode);
+            saveDemoData();
+            
+            // Show the code
+            showGeneratedCode(code, childName, childDOB, parent.name);
+            
+            showNotification('New portal code generated for parent!');
+            addActivity(`Generated new code for ${parent.name}`);
+            renderVerificationTable();
+            
+            // Sync to parent system
+            synchronizeCodes();
         }
-    } else {
-        newChildFields.style.display = 'block';
-    }
-    
-    updateCodePreview();
-}
 
-function updateCodePreview() {
-    const firstName = document.getElementById('pFirstName').value || 'Parent';
-    const lastName = document.getElementById('pLastName').value || 'Name';
-    const generateCode = document.getElementById('pGenerateCode').checked;
-    const previewDiv = document.getElementById('codePreview');
-    
-    if (generateCode) {
-        previewDiv.style.display = 'block';
-        // Generate preview code
-        const date = new Date();
-        const dateStr = date.getFullYear().toString().slice(-2) + 
-                       (date.getMonth() + 1).toString().padStart(2, '0') + 
-                       date.getDate().toString().padStart(2, '0');
-        const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-        const random = Math.floor(Math.random() * 9000 + 1000);
-        
-        const previewCode = `PAR-${dateStr}-${initials}-${random}`;
-        document.getElementById('previewCodeText').textContent = previewCode;
-    } else {
-        previewDiv.style.display = 'none';
-    }
-}
-
-function generateParentWithCode() {
-    // Quick generation function
-    const today = new Date();
-    const dateStr = today.getFullYear() + 
-                   (today.getMonth() + 1).toString().padStart(2, '0') + 
-                   today.getDate().toString().padStart(2, '0');
-    
-    const children = demoData.children || [];
-    if (children.length === 0) {
-        alert('Please add children first before generating parent codes.');
-        return;
-    }
-    
-    const randomChild = children[Math.floor(Math.random() * children.length)];
-    const childName = `${randomChild.firstName} ${randomChild.lastName}`;
-    
-    // Generate the code
-    const code = `${dateStr}${randomChild.firstName}${randomChild.lastName}`.replace(/\s/g, '');
-    
-    // Add to verification codes
-    const verificationCode = {
-        code: code,
-        childName: childName,
-        dob: randomChild.dob,
-        parentName: 'Auto-Generated',
-        generatedDate: today.toISOString().split('T')[0],
-        status: 'active'
-    };
-    
-    demoData.verificationCodes.push(verificationCode);
-    saveDemoData();
-    
-    // Show the code
-    showGeneratedCode(code, childName, randomChild.dob);
-    
-    showNotification('Parent verification code generated!');
-    addActivity(`Generated quick parent code for ${childName}`);
-    renderVerificationTable();
-}
-
-function saveNewParent() {
-    // Get form values
-    const firstName = document.getElementById('pFirstName').value.trim();
-    const lastName = document.getElementById('pLastName').value.trim();
-    const email = document.getElementById('pEmail').value.trim();
-    const phone = document.getElementById('pPhone').value.trim();
-    const relationship = document.getElementById('pRelationship').value;
-    const generateCode = document.getElementById('pGenerateCode').checked;
-    
-    // Validation
-    if (!firstName || !lastName || !email || !relationship) {
-        alert('Please fill in all required fields');
-        return;
-    }
-    
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
-    
-    // Get child info
-    const childSelect = document.getElementById('pChildSelect').value;
-    let childFirstName = '';
-    let childLastName = '';
-    let childDOB = '';
-    
-    if (childSelect === 'new') {
-        childFirstName = document.getElementById('pChildFirst').value.trim();
-        childLastName = document.getElementById('pChildLast').value.trim();
-        childDOB = document.getElementById('pChildDOB').value;
-    } else if (childSelect) {
-        const child = demoData.children.find(c => c.id == childSelect);
-        if (child) {
-            childFirstName = child.firstName;
-            childLastName = child.lastName;
-            childDOB = child.dob;
-        }
-    }
-    
-    // Create parent object
-    const parent = {
-        id: Date.now(),
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        phone: phone,
-        relationship: relationship,
-        childName: childFirstName && childLastName ? `${childFirstName} ${childLastName}` : 'Not specified',
-        childDOB: childDOB,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        portalAccess: generateCode ? 'pending' : 'none'
-    };
-    
-    // Save to demo data
-    if (!demoData.parents) demoData.parents = [];
-    demoData.parents.push(parent);
-    
-    // Save to localStorage for parent portal
-    const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    parentAccounts[email] = {
-        username: email,
-        name: `${firstName} ${lastName}`,
-        email: email,
-        phone: phone,
-        relationship: relationship,
-        childName: parent.childName,
-        childDOB: childDOB,
-        createdAt: new Date().toISOString(),
-        status: 'active'
-    };
-    localStorage.setItem('parentAccounts', JSON.stringify(parentAccounts));
-    
-    // Generate verification code if requested
-    if (generateCode && childFirstName && childLastName && childDOB) {
-        const dateObj = new Date(childDOB);
-        const yyyy = dateObj.getFullYear();
-        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const dd = String(dateObj.getDate()).padStart(2, '0');
-        const code = `${yyyy}${mm}${dd}${childFirstName}${childLastName}`.replace(/\s/g, '');
-        
-        const verificationCode = {
-            code: code,
-            childName: `${childFirstName} ${childLastName}`,
-            dob: childDOB,
-            parentName: `${firstName} ${lastName}`,
-            parentEmail: email,
-            generatedDate: new Date().toISOString().split('T')[0],
-            status: 'active'
-        };
-        
-        demoData.verificationCodes.push(verificationCode);
-        
-        // Also register child for portal access
-        const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
-        registeredChildren[code] = {
-            childName: `${childFirstName} ${childLastName}`,
-            dob: childDOB,
-            parentName: `${firstName} ${lastName}`,
-            parentEmail: email
-        };
-        localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
-        
-        // Show the generated code
-        showGeneratedCode(code, `${childFirstName} ${childLastName}`, childDOB, `${firstName} ${lastName}`);
-    }
-    
-    // Save all data
-    saveDemoData();
-    
-    // Update UI
-    closeParentModal();
-    renderParentsTable();
-    updateDashboardStats();
-    if (generateCode) {
-        renderVerificationTable();
-    }
-    
-    showNotification('Parent account created successfully!');
-    addActivity(`Added new parent: ${firstName} ${lastName}`);
-    
-    // Send welcome email (simulated)
-    sendParentWelcomeEmail(parent, generateCode);
-}
-
-function showGeneratedCode(code, childName, childDOB, parentName = 'Parent') {
-    const modalHTML = `
-        <div id="parentCodeModal" class="modal" style="display: flex;">
-            <div class="modal-content" style="max-width: 600px;">
-                <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 4rem; color: #2a5ca7; margin-bottom: 20px;">
-                        <i class="fas fa-key"></i>
-                    </div>
-                    <h3>Parent Portal Access Created!</h3>
-                    <p>Account has been created and portal access code generated.</p>
-                </div>
-                
-                <div style="background: linear-gradient(135deg, #2a5ca7, #1d4a8a); color: white; padding: 25px; border-radius: 10px; text-align: center; margin: 20px 0;">
-                    <h4 style="margin-bottom: 15px;"><i class="fas fa-user-shield"></i> Portal Access Code</h4>
-                    <div id="finalGeneratedCode" style="font-family: monospace; font-size: 2rem; font-weight: bold; letter-spacing: 2px; margin: 15px 0; word-break: break-all;">
-                        ${code}
-                    </div>
-                    <p style="opacity: 0.9; font-size: 0.9rem;">
-                        For ${childName}, born ${formatDate(childDOB)}
-                    </p>
-                </div>
-                
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h5><i class="fas fa-info-circle"></i> Next Steps</h5>
-                    <ol style="text-align: left; margin: 10px 0 0 20px;">
-                        <li>Share this code with ${parentName}</li>
-                        <li>Parent should visit the portal setup page</li>
-                        <li>Enter this code to create their account</li>
-                        <li>They will receive login credentials via email</li>
-                    </ol>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="copyParentCode()">
-                        <i class="fas fa-copy"></i> Copy Code
-                    </button>
-                    <button class="btn btn-secondary" onclick="emailParentCode('${code}', '${parentName}', '${childName}')">
-                        <i class="fas fa-envelope"></i> Email to Parent
-                    </button>
-                    <button class="btn btn-success" onclick="printParentInstructions('${code}', '${childName}')" style="grid-column: span 2;">
-                        <i class="fas fa-print"></i> Print Instructions
-                    </button>
-                </div>
-                
-                <button class="btn btn-secondary" onclick="closeParentCodeModal()" style="width: 100%; margin-top: 15px;">
-                    Done
-                </button>
-            </div>
-        </div>
-    `;
-    
-    // Remove any existing modal
-    const existingModal = document.getElementById('parentCodeModal');
-    if (existingModal) existingModal.remove();
-    
-    // Add new modal
-    const modalDiv = document.createElement('div');
-    modalDiv.innerHTML = modalHTML;
-    document.body.appendChild(modalDiv);
-}
-
-function copyParentCode() {
-    const code = document.getElementById('finalGeneratedCode').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        showNotification('Code copied to clipboard!');
-    });
-}
-
-function emailParentCode(code, parentName, childName) {
-    // Simulate sending email
-    showNotification(`Email sent to ${parentName} with portal access code`);
-    
-    // Log for debugging
-    console.log(`Emailing code ${code} to parent of ${childName}`);
-}
-
-function printParentInstructions(code, childName) {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>Parent Portal Instructions - ${childName}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
-                    .header { text-align: center; margin-bottom: 30px; }
-                    .code { font-size: 24px; font-weight: bold; color: #2a5ca7; padding: 15px; 
-                            border: 2px dashed #2a5ca7; text-align: center; margin: 20px 0; 
-                            font-family: monospace; }
-                    .instructions { background: #f8f9fa; padding: 20px; border-radius: 5px; }
-                    .step { margin-bottom: 15px; }
-                    .footer { margin-top: 40px; font-size: 0.9em; color: #666; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>Parent Portal Access</h1>
-                    <h3>For ${childName}</h3>
-                </div>
-                
-                <div class="code">${code}</div>
-                
-                <div class="instructions">
-                    <h3>Setup Instructions:</h3>
-                    <div class="step"><strong>Step 1:</strong> Go to: yourdaycare.com/parent-portal</div>
-                    <div class="step"><strong>Step 2:</strong> Click "First Time Setup"</div>
-                    <div class="step"><strong>Step 3:</strong> Enter the code above exactly as shown</div>
-                    <div class="step"><strong>Step 4:</strong> Create your account with email and password</div>
-                    <div class="step"><strong>Step 5:</strong> Check your email for confirmation</div>
-                </div>
-                
-                <div class="footer">
-                    <p><strong>Important:</strong> This code is unique to your child. Do not share with others.</p>
-                    <p>If you have questions, contact: admin@thechosendaycare.com</p>
-                    <p>Generated: ${new Date().toLocaleDateString()}</p>
-                </div>
-            </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-}
-
-function closeParentCodeModal() {
-    const modal = document.getElementById('parentCodeModal');
-    if (modal) modal.remove();
-}
-
-function closeParentModal() {
-    const modal = document.getElementById('addParentModal');
-    if (modal) modal.remove();
-}
-
-function sendParentWelcomeEmail(parent, hasCode) {
-    // Simulate sending welcome email
-    console.log(`Welcome email sent to ${parent.email}`);
-    console.log('Parent details:', parent);
-    if (hasCode) {
-        console.log('Portal access instructions included');
-    }
-}
-
-// ===================================================
-// ENHANCED PARENTS TABLE RENDERING
-// ===================================================
-
-// Override the existing renderParentsTable function
-const originalRenderParentsTable = window.renderParentsTable;
-window.renderParentsTable = function() {
-    const table = document.getElementById('parentsTable');
-    if (!table) return;
-    
-    table.innerHTML = '';
-    
-    // Get all parents from various sources
-    const allParents = [];
-    
-    // 1. From demoData (newly added parents)
-    if (demoData.parents && demoData.parents.length > 0) {
-        demoData.parents.forEach(parent => {
-            allParents.push({
-                source: 'demo',
-                data: parent
+        function exportParentsList() {
+            const allParents = [];
+            
+            // Collect parents from all sources
+            if (demoData.parents && demoData.parents.length > 0) {
+                allParents.push(...demoData.parents);
+            }
+            
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            Object.values(parentAccounts).forEach(parent => {
+                allParents.push(parent);
             });
-        });
-    }
-    
-    // 2. From localStorage (existing parent accounts)
-    const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    Object.values(parentAccounts).forEach(parent => {
-        allParents.push({
-            source: 'localStorage',
-            data: parent
-        });
-    });
-    
-    // 3. From children data (parents mentioned in child records)
-    demoData.children.forEach(child => {
-        const parentName = child.parentName;
-        const parentEmail = child.parentEmail;
-        const parentPhone = child.parentPhone;
-        
-        if (parentName && !allParents.find(p => p.data.email === parentEmail)) {
-            allParents.push({
-                source: 'child',
-                data: {
-                    name: parentName,
-                    email: parentEmail || 'N/A',
-                    phone: parentPhone || 'N/A',
-                    childName: `${child.firstName} ${child.lastName}`,
-                    createdAt: child.startDate || new Date().toISOString(),
-                    status: 'active'
+            
+            // Convert to CSV
+            let csv = 'Name,Email,Phone,Child,Relationship,Created,Status\n';
+            
+            allParents.forEach(parent => {
+                csv += `"${parent.name || ''}","${parent.email || ''}","${parent.phone || ''}",`;
+                csv += `"${parent.childName || ''}","${parent.relationship || ''}",`;
+                csv += `"${formatDate(parent.createdAt)}","${parent.status || 'active'}"\n`;
+            });
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `parents-export-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showNotification('Parents list exported to CSV!');
+        }
+
+        function sendBulkEmails() {
+            // Get all parent emails
+            const emails = [];
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            Object.values(parentAccounts).forEach(parent => {
+                if (parent.email && parent.email !== 'N/A') {
+                    emails.push(parent.email);
                 }
             });
+            
+            if (emails.length === 0) {
+                alert('No parent emails found!');
+                return;
+            }
+            
+            const emailList = emails.join('; ');
+            const subject = 'Important Update from The Chosen Day Care';
+            const body = 'Dear Parent,\n\nThis is an important update regarding your child.\n\nBest regards,\nDay Care Administration';
+            
+            // Open email client
+            window.location.href = `mailto:${emailList}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
-    });
-    
-    // Sort by creation date (newest first)
-    allParents.sort((a, b) => {
-        return new Date(b.data.createdAt) - new Date(a.data.createdAt);
-    });
-    
-    // Render table rows
-    allParents.forEach((parentObj, index) => {
-        const parent = parentObj.data;
-        const row = document.createElement('tr');
-        
-        row.innerHTML = `
-            <td>${parent.name || 'N/A'}</td>
-            <td>${parent.email || 'N/A'}</td>
-            <td>${parent.phone || 'N/A'}</td>
-            <td>${parent.childName || 'N/A'}</td>
-            <td>${formatDate(parent.createdAt)}</td>
-            <td><span class="badge badge-active">Active</span></td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn btn-primary btn-sm" onclick="contactParent('${parent.email}')">
-                        <i class="fas fa-envelope"></i>
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="viewParentDetails(${index})">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="generateNewCodeForParent('${parent.email}')">
-                        <i class="fas fa-key"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        
-        table.appendChild(row);
-    });
-    
-    // Update parent count
-    updateDashboardStats();
-};
-
-// Enhanced parent view function
-function viewParentDetails(index) {
-    // Show detailed parent information
-    showNotification('Parent details view coming soon!');
-}
-
-function generateNewCodeForParent(email) {
-    const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    const parent = parentAccounts[email];
-    
-    if (!parent) {
-        alert('Parent not found!');
-        return;
-    }
-    
-    const childName = parent.childName;
-    const childDOB = parent.childDOB;
-    
-    if (!childName || !childDOB) {
-        alert('Child information missing. Cannot generate code.');
-        return;
-    }
-    
-    // Extract child first and last name
-    const nameParts = childName.split(' ');
-    const childFirstName = nameParts[0];
-    const childLastName = nameParts.slice(1).join('');
-    
-    // Generate code
-    const dateObj = new Date(childDOB);
-    const yyyy = dateObj.getFullYear();
-    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const dd = String(dateObj.getDate()).padStart(2, '0');
-    const code = `${yyyy}${mm}${dd}${childFirstName}${childLastName}`.replace(/\s/g, '');
-    
-    // Add to verification codes
-    const verificationCode = {
-        code: code,
-        childName: childName,
-        dob: childDOB,
-        parentName: parent.name,
-        parentEmail: email,
-        generatedDate: new Date().toISOString().split('T')[0],
-        status: 'active'
-    };
-    
-    demoData.verificationCodes.push(verificationCode);
-    saveDemoData();
-    
-    // Show the code
-    showGeneratedCode(code, childName, childDOB, parent.name);
-    
-    showNotification('New portal code generated for parent!');
-    addActivity(`Generated new code for ${parent.name}`);
-    renderVerificationTable();
-}
-
-// ===================================================
-// QUICK ACTIONS FOR PARENT MANAGEMENT
-// ===================================================
-
-// Add quick action buttons to the overview section
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        const overviewCard = document.querySelector('#overview .admin-card:first-child');
-        if (overviewCard) {
-            const quickActionsHTML = `
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0;">
-                    <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                        <button class="btn btn-primary" onclick="openAddParentModal()">
-                            <i class="fas fa-user-plus"></i> Add Parent
-                        </button>
-                        <button class="btn btn-success" onclick="generateParentWithCode()">
-                            <i class="fas fa-qrcode"></i> Generate Code
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportParentsList()">
-                            <i class="fas fa-download"></i> Export Parents
-                        </button>
-                        <button class="btn btn-info" onclick="sendBulkEmails()">
-                            <i class="fas fa-mail-bulk"></i> Bulk Email
-                        </button>
-                    </div>
-                </div>
-            `;
-            overviewCard.innerHTML += quickActionsHTML;
-        }
-    }, 1000);
-});
-
-function exportParentsList() {
-    const allParents = [];
-    
-    // Collect parents from all sources
-    if (demoData.parents && demoData.parents.length > 0) {
-        allParents.push(...demoData.parents);
-    }
-    
-    const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    Object.values(parentAccounts).forEach(parent => {
-        allParents.push(parent);
-    });
-    
-    // Convert to CSV
-    let csv = 'Name,Email,Phone,Child,Relationship,Created,Status\n';
-    
-    allParents.forEach(parent => {
-        csv += `"${parent.name || ''}","${parent.email || ''}","${parent.phone || ''}",`;
-        csv += `"${parent.childName || ''}","${parent.relationship || ''}",`;
-        csv += `"${formatDate(parent.createdAt)}","${parent.status || 'active'}"\n`;
-    });
-    
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `parents-export-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    showNotification('Parents list exported to CSV!');
-}
-
-function sendBulkEmails() {
-    // Get all parent emails
-    const emails = [];
-    const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
-    Object.values(parentAccounts).forEach(parent => {
-        if (parent.email && parent.email !== 'N/A') {
-            emails.push(parent.email);
-        }
-    });
-    
-    if (emails.length === 0) {
-        alert('No parent emails found!');
-        return;
-    }
-    
-    const emailList = emails.join('; ');
-    const subject = 'Important Update from The Chosen Day Care';
-    const body = 'Dear Parent,\n\nThis is an important update regarding your child.\n\nBest regards,\nDay Care Administration';
-    
-    // Open email client
-    window.location.href = `mailto:${emailList}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-// Initialize enhanced system
-setTimeout(() => {
-    console.log('Enhanced Parent Management System Loaded');
-}, 500);
-</script>
-
-<!-- Add this CSS for the new parent modal -->
-<style>
-.parent-input {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-    margin-top: 5px;
-}
-
-.parent-input:focus {
-    border-color: #2a5ca7;
-    outline: none;
-}
-
-#newChildFields {
-    border-left: 3px solid #2a5ca7;
-    padding-left: 15px;
-    margin: 15px 0;
-}
-</style>
-        
-</script>
+    </script>
 </body>
-    
 </html>
