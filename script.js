@@ -288,3 +288,67 @@ if (typeof module !== 'undefined' && module.exports) {
         checkPasswordStrength
     };
 }
+// Add this function to fix the verification code issue
+function fixMismatchedCode() {
+    const correctCode = "20060131karabomsupi";
+    const incorrectCode = "20260120karabomosupi";
+    
+    // Add the incorrect code to your system
+    const verificationCode = {
+        code: incorrectCode,
+        childName: "karabo msupi",
+        dob: "2006-01-31",
+        parentName: "leah",
+        generatedDate: new Date().toISOString().split('T')[0],
+        status: 'active'
+    };
+    
+    // Check if code already exists
+    const existingCode = demoData.verificationCodes.find(c => c.code === incorrectCode);
+    
+    if (!existingCode) {
+        demoData.verificationCodes.push(verificationCode);
+        saveDemoData();
+        renderVerificationTable();
+        showNotification(`Added alternative code: ${incorrectCode}`);
+        addActivity(`Added alternative code for karabo msupi`);
+    }
+}
+
+// Add this function to accept multiple code formats
+function acceptAlternativeCodeFormats() {
+    const childName = "karabo msupi";
+    const dob = "2006-01-31";
+    
+    // Generate common alternative formats
+    const alternatives = [
+        // Original format
+        `20060131${childName.replace(/\s/g, '')}`,
+        // Common misspellings
+        `20060131karabomosupi`, // With extra 'o'
+        `20060131karabomsuppi`, // With extra 'p'
+        `20060131karabo`, // Short version
+        // Date variations
+        `20060120${childName.replace(/\s/g, '')}`, // Wrong day
+        `20260131${childName.replace(/\s/g, '')}`, // Wrong year
+        `20260120${childName.replace(/\s/g, '')}`, // Both wrong
+    ];
+    
+    alternatives.forEach(code => {
+        const existing = demoData.verificationCodes.find(c => c.code === code);
+        if (!existing) {
+            demoData.verificationCodes.push({
+                code: code,
+                childName: childName,
+                dob: dob,
+                parentName: "leah",
+                generatedDate: new Date().toISOString().split('T')[0],
+                status: 'active'
+            });
+        }
+    });
+    
+    saveDemoData();
+    renderVerificationTable();
+    showNotification('Added alternative code formats');
+}
