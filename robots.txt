@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yourusername.github.io/the-chosen-daycare/sitemap.xml
