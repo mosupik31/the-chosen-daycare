@@ -234,9 +234,44 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        
+        .login-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .warning-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
     </style>
 </head>
 <body>
+    <!-- Security Check - Hidden warning that shows if not logged in -->
+    <div class="login-warning" id="loginWarning" style="display: none;">
+        <div class="warning-box">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc3545; margin-bottom: 20px;"></i>
+            <h2>Access Denied</h2>
+            <p>You must be logged in as an administrator to access this page.</p>
+            <div style="margin-top: 30px;">
+                <a href="admin-login.html" class="btn btn-primary">Go to Admin Login</a>
+                <a href="index.html" class="btn btn-secondary" style="margin-left: 15px;">Return to Home</a>
+            </div>
+        </div>
+    </div>
+
     <header class="main-header">
         <div class="container">
             <div class="logo">
@@ -299,9 +334,6 @@
                 <button class="admin-nav-btn" data-section="payments">
                     <i class="fas fa-credit-card"></i> Payments
                 </button>
-                <button class="admin-nav-btn" data-section="staff">
-                    <i class="fas fa-user-tie"></i> Staff
-                </button>
                 <button class="admin-nav-btn" data-section="verification">
                     <i class="fas fa-key"></i> Verification Codes
                 </button>
@@ -333,17 +365,21 @@
                             <p>Monthly Revenue</p>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-user-tie" style="font-size: 2rem; color: #e63946;"></i>
-                            <div class="stat-number" id="totalStaff">0</div>
-                            <p>Staff Members</p>
+                            <i class="fas fa-file-invoice-dollar" style="font-size: 2rem; color: #e63946;"></i>
+                            <div class="stat-number" id="pendingPayments">0</div>
+                            <p>Pending Payments</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="admin-card">
                     <h3>Recent Activity</h3>
-                    <div id="recentActivity">
-                        <p>No recent activity</p>
+                    <div id="recentActivity" style="margin-top: 20px;">
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 5px; margin-bottom: 10px;">
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <span style="margin-left: 10px;">System initialized successfully</span>
+                            <span style="float: right; color: #666; font-size: 0.9rem;">Just now</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -353,13 +389,13 @@
                 <div class="admin-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h2>Children Management</h2>
-                        <button class="btn btn-primary" onclick="addNewChild()">
+                        <button class="btn btn-primary" onclick="openAddChildModal()">
                             <i class="fas fa-plus"></i> Add New Child
                         </button>
                     </div>
                     
                     <div class="search-bar">
-                        <input type="text" id="searchChildren" placeholder="Search children by name, parent, or room..." onkeyup="searchChildren()">
+                        <input type="text" id="searchChildren" placeholder="Search children by name..." onkeyup="searchChildren()">
                     </div>
                     
                     <table class="data-table">
@@ -386,7 +422,7 @@
                     <h2>Parents Management</h2>
                     
                     <div class="search-bar">
-                        <input type="text" id="searchParents" placeholder="Search parents by name, email, or child..." onkeyup="searchParents()">
+                        <input type="text" id="searchParents" placeholder="Search parents by name..." onkeyup="searchParents()">
                     </div>
                     
                     <table class="data-table">
@@ -420,7 +456,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-number" id="totalPending">$0</div>
-                            <p>Pending Payments</p>
+                            <p>Pending</p>
                         </div>
                         <div class="stat-card">
                             <div class="stat-number" id="totalOverdue">$0</div>
@@ -447,46 +483,18 @@
                 </div>
             </div>
             
-            <!-- Staff Management Section -->
-            <div id="staff" class="admin-section">
-                <div class="admin-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>Staff Management</h2>
-                        <button class="btn btn-primary" onclick="addNewStaff()">
-                            <i class="fas fa-plus"></i> Add Staff Member
-                        </button>
-                    </div>
-                    
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Staff Name</th>
-                                <th>Position</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Start Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="staffTable">
-                            <!-- Staff data will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
             <!-- Verification Codes Section -->
             <div id="verification" class="admin-section">
                 <div class="admin-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h2>Verification Codes Management</h2>
-                        <button class="btn btn-primary" onclick="generateVerificationCode()">
+                        <button class="btn btn-primary" onclick="openVerificationModal()">
                             <i class="fas fa-key"></i> Generate New Code
                         </button>
                     </div>
                     
-                    <p>Verification codes allow parents to create portal accounts. Format: YYYYMMDD + FirstName + LastName</p>
+                    <p>Verification codes allow parents to create portal accounts.</p>
+                    <p><strong>Format:</strong> YYYYMMDD + FirstName + LastName (no spaces)</p>
                     
                     <table class="data-table">
                         <thead>
@@ -530,26 +538,11 @@
                             </form>
                         </div>
                         
-                        <h3>System Maintenance</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
-                            <button class="btn btn-secondary" onclick="backupDatabase()">
-                                <i class="fas fa-database"></i> Backup Database
-                            </button>
-                            <button class="btn btn-secondary" onclick="clearCache()">
-                                <i class="fas fa-broom"></i> Clear Cache
-                            </button>
-                            <button class="btn btn-secondary" onclick="viewSystemLogs()">
-                                <i class="fas fa-clipboard-list"></i> View Logs
-                            </button>
-                        </div>
-                        
-                        <h3>Danger Zone</h3>
-                        <div style="background: #f8d7da; border: 2px solid #dc3545; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h4 style="color: #dc3545;">⚠️ Reset System</h4>
-                            <p>This will delete all demo data. Use with caution!</p>
-                            <button class="btn btn-danger" onclick="resetDemoData()" style="margin-top: 10px;">
-                                <i class="fas fa-exclamation-triangle"></i> Reset Demo Data
-                            </button>
+                        <h3>System Information</h3>
+                        <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <p><strong>Version:</strong> 1.0.0</p>
+                            <p><strong>Last Backup:</strong> <span id="lastBackup">Never</span></p>
+                            <p><strong>Storage Used:</strong> <span id="storageUsed">0 KB</span></p>
                         </div>
                     </div>
                 </div>
@@ -563,35 +556,43 @@
             <h3>Add New Child</h3>
             <form id="addChildForm">
                 <div class="form-group">
-                    <label>First Name</label>
+                    <label>First Name *</label>
                     <input type="text" id="childFirstName" required>
                 </div>
                 <div class="form-group">
-                    <label>Last Name</label>
+                    <label>Last Name *</label>
                     <input type="text" id="childLastName" required>
                 </div>
                 <div class="form-group">
-                    <label>Date of Birth</label>
+                    <label>Date of Birth *</label>
                     <input type="date" id="childDOB" required>
                 </div>
                 <div class="form-group">
-                    <label>Parent Name</label>
+                    <label>Parent Name *</label>
                     <input type="text" id="childParentName" required>
                 </div>
                 <div class="form-group">
                     <label>Parent Email</label>
-                    <input type="email" id="childParentEmail" required>
+                    <input type="email" id="childParentEmail">
+                </div>
+                <div class="form-group">
+                    <label>Parent Phone</label>
+                    <input type="tel" id="childParentPhone">
                 </div>
                 <div class="form-group">
                     <label>Room Assignment</label>
-                    <select id="childRoom" required>
+                    <select id="childRoom">
                         <option value="">Select Room</option>
-                        <option value="infant">Infant Room</option>
-                        <option value="toddler">Toddler Room</option>
-                        <option value="preschool1">Preschool 1</option>
-                        <option value="preschool2">Preschool 2</option>
-                        <option value="aftercare">After School Care</option>
+                        <option value="infant">Infant Room (6w-18m)</option>
+                        <option value="toddler">Toddler Room (18m-3y)</option>
+                        <option value="preschool1">Preschool 1 (3-4y)</option>
+                        <option value="preschool2">Preschool 2 (4-5y)</option>
+                        <option value="aftercare">After School Care (5-12y)</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="childStartDate">
                 </div>
                 <div style="display: flex; gap: 15px; margin-top: 20px;">
                     <button type="submit" class="btn btn-primary">Add Child</button>
@@ -605,28 +606,26 @@
     <div id="verificationModal" class="modal">
         <div class="modal-content">
             <h3>Generate Verification Code</h3>
-            <form id="verificationForm">
-                <div class="form-group">
-                    <label>Select Child</label>
-                    <select id="verifyChildSelect" required>
-                        <option value="">Select a child</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Or Enter Child Details</label>
-                    <input type="text" id="manualChildFirstName" placeholder="First Name">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="manualChildLastName" placeholder="Last Name">
-                </div>
-                <div class="form-group">
-                    <input type="date" id="manualChildDOB" placeholder="Date of Birth">
-                </div>
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary">Generate Code</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('verificationModal')">Cancel</button>
-                </div>
-            </form>
+            <div class="form-group">
+                <label>Child's First Name *</label>
+                <input type="text" id="vChildFirstName" required>
+            </div>
+            <div class="form-group">
+                <label>Child's Last Name *</label>
+                <input type="text" id="vChildLastName" required>
+            </div>
+            <div class="form-group">
+                <label>Date of Birth *</label>
+                <input type="date" id="vChildDOB" required>
+            </div>
+            <div class="form-group">
+                <label>Parent Name</label>
+                <input type="text" id="vParentName">
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="generateCode()">Generate Code</button>
+                <button class="btn btn-secondary" onclick="closeModal('verificationModal')">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -635,28 +634,56 @@
         <div class="modal-content">
             <h3>Verification Code Generated</h3>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-                <h4 id="generatedCodeDisplay" style="font-family: monospace; font-size: 1.5rem; color: #2a5ca7;"></h4>
+                <h4 id="generatedCodeDisplay" style="font-family: monospace; font-size: 1.8rem; color: #2a5ca7; word-break: break-all;"></h4>
                 <p id="generatedCodeInfo" style="color: #666; margin-top: 10px;"></p>
             </div>
             <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <p><strong>Important:</strong> Provide this code to the parent for portal setup.</p>
+                <p><strong>Instructions for parent:</strong></p>
+                <ol style="text-align: left; margin: 10px 0 0 20px;">
+                    <li>Go to portal-setup.html</li>
+                    <li>Enter this exact code (case-sensitive)</li>
+                    <li>Follow the steps to create account</li>
+                </ol>
             </div>
-            <button class="btn btn-primary" onclick="copyToClipboard()" style="width: 100%;">
-                <i class="fas fa-copy"></i> Copy to Clipboard
+            <button class="btn btn-primary" onclick="copyToClipboard()" style="width: 100%; margin-bottom: 10px;">
+                <i class="fas fa-copy"></i> Copy Code to Clipboard
             </button>
-            <button class="btn btn-secondary" onclick="closeModal('generatedCodeModal')" style="width: 100%; margin-top: 10px;">
+            <button class="btn btn-secondary" onclick="closeModal('generatedCodeModal')" style="width: 100%;">
                 Close
             </button>
         </div>
     </div>
 
     <script>
+        // SECURITY CHECK - Must be FIRST in the script
+        (function() {
+            const adminUser = JSON.parse(sessionStorage.getItem('adminUser') || '{}');
+            const isAdmin = sessionStorage.getItem('isAdmin');
+            
+            if (!adminUser.username || isAdmin !== 'true') {
+                document.getElementById('loginWarning').style.display = 'flex';
+                document.querySelector('.admin-dashboard').style.display = 'none';
+                document.querySelector('.main-header').style.display = 'none';
+                
+                // Log unauthorized access attempt
+                console.warn('Unauthorized access attempt to admin dashboard');
+                return;
+            }
+        })();
+
         let currentAdmin = null;
-        
+        let demoData = {
+            children: [],
+            parents: [],
+            payments: [],
+            verificationCodes: []
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             // Check if admin is logged in
             const adminUser = JSON.parse(sessionStorage.getItem('adminUser') || '{}');
-            if (!adminUser || !adminUser.username) {
+            if (!adminUser.username) {
                 window.location.href = 'admin-login.html';
                 return;
             }
@@ -665,7 +692,8 @@
             
             // Display admin info
             document.getElementById('adminName').textContent = adminUser.name || 'Administrator';
-            document.getElementById('adminRole').textContent = adminUser.role ? adminUser.role.charAt(0).toUpperCase() + adminUser.role.slice(1) : 'Administrator';
+            document.getElementById('adminRole').textContent = adminUser.role ? 
+                adminUser.role.charAt(0).toUpperCase() + adminUser.role.slice(1) : 'Administrator';
             document.getElementById('adminInitials').textContent = getInitials(adminUser.name || 'A');
             
             if (adminUser.lastLogin) {
@@ -673,13 +701,8 @@
                 document.getElementById('adminLastLogin').textContent = lastLogin.toLocaleString();
             }
             
-            // Load data
-            loadDashboardData();
-            loadChildrenData();
-            loadParentsData();
-            loadPaymentsData();
-            loadStaffData();
-            loadVerificationCodes();
+            // Load demo data
+            loadDemoData();
             
             // Setup navigation
             document.querySelectorAll('.admin-nav-btn').forEach(btn => {
@@ -716,4 +739,569 @@
                 saveNewChild();
             });
             
-            document
+            document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                changeAdminPassword();
+            });
+            
+            // Load initial data
+            updateDashboardStats();
+            renderChildrenTable();
+            renderParentsTable();
+            renderPaymentsTable();
+            renderVerificationTable();
+            
+            // Set session timeout
+            startSessionTimer();
+        });
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+
+        function loadDemoData() {
+            const savedData = localStorage.getItem('daycareAdminData');
+            if (savedData) {
+                demoData = JSON.parse(savedData);
+            } else {
+                // Create initial demo data
+                demoData = {
+                    children: [
+                        {
+                            id: 1,
+                            firstName: 'Emma',
+                            lastName: 'Johnson',
+                            dob: '2020-05-15',
+                            parentName: 'Michael Johnson',
+                            parentEmail: 'michael@example.com',
+                            parentPhone: '(555) 123-4567',
+                            room: 'preschool1',
+                            startDate: '2023-09-01',
+                            status: 'active'
+                        },
+                        {
+                            id: 2,
+                            firstName: 'Liam',
+                            lastName: 'Smith',
+                            dob: '2019-12-10',
+                            parentName: 'Sarah Smith',
+                            parentEmail: 'sarah@example.com',
+                            parentPhone: '(555) 987-6543',
+                            room: 'preschool2',
+                            startDate: '2023-08-15',
+                            status: 'active'
+                        }
+                    ],
+                    parents: [],
+                    payments: [
+                        {
+                            id: 1,
+                            parentName: 'Michael Johnson',
+                            childName: 'Emma Johnson',
+                            amount: 450,
+                            dueDate: '2024-01-15',
+                            status: 'paid',
+                            paymentDate: '2024-01-10'
+                        },
+                        {
+                            id: 2,
+                            parentName: 'Sarah Smith',
+                            childName: 'Liam Smith',
+                            amount: 450,
+                            dueDate: '2024-01-15',
+                            status: 'pending',
+                            paymentDate: null
+                        }
+                    ],
+                    verificationCodes: [
+                        {
+                            code: '20200515EmmaJohnson',
+                            childName: 'Emma Johnson',
+                            dob: '2020-05-15',
+                            parentName: 'Michael Johnson',
+                            generatedDate: '2023-12-01',
+                            status: 'used',
+                            usedBy: 'michaelj'
+                        }
+                    ]
+                };
+                saveDemoData();
+            }
+        }
+
+        function saveDemoData() {
+            localStorage.setItem('daycareAdminData', JSON.stringify(demoData));
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('totalChildren').textContent = demoData.children.length;
+            document.getElementById('totalParents').textContent = demoData.parents.length;
+            
+            const totalRevenue = demoData.payments
+                .filter(p => p.status === 'paid')
+                .reduce((sum, p) => sum + p.amount, 0);
+            document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
+            
+            const pendingCount = demoData.payments.filter(p => p.status === 'pending').length;
+            document.getElementById('pendingPayments').textContent = pendingCount;
+            
+            // Update payment stats
+            const totalPaid = demoData.payments
+                .filter(p => p.status === 'paid')
+                .reduce((sum, p) => sum + p.amount, 0);
+            document.getElementById('totalPaid').textContent = `$${totalPaid}`;
+            
+            const totalPending = demoData.payments
+                .filter(p => p.status === 'pending')
+                .reduce((sum, p) => sum + p.amount, 0);
+            document.getElementById('totalPending').textContent = `$${totalPending}`;
+            
+            const totalOverdue = demoData.payments
+                .filter(p => p.status === 'overdue')
+                .reduce((sum, p) => sum + p.amount, 0);
+            document.getElementById('totalOverdue').textContent = `$${totalOverdue}`;
+        }
+
+        function renderChildrenTable() {
+            const table = document.getElementById('childrenTable');
+            table.innerHTML = '';
+            
+            demoData.children.forEach(child => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${child.firstName} ${child.lastName}</td>
+                    <td>${formatDate(child.dob)}</td>
+                    <td>${child.parentName}</td>
+                    <td>${getRoomName(child.room)}</td>
+                    <td><span class="badge badge-${child.status}">${child.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="editChild(${child.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="viewChild(${child.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteChild(${child.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function renderParentsTable() {
+            const table = document.getElementById('parentsTable');
+            table.innerHTML = '';
+            
+            // Get parents from localStorage (parent accounts)
+            const parentAccounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            
+            Object.values(parentAccounts).forEach(parent => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${parent.name || 'N/A'}</td>
+                    <td>${parent.email || 'N/A'}</td>
+                    <td>${parent.phone || 'N/A'}</td>
+                    <td>${parent.childName || 'N/A'}</td>
+                    <td>${formatDate(parent.createdAt)}</td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="contactParent('${parent.email}')">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="viewParent('${parent.username}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function renderPaymentsTable() {
+            const table = document.getElementById('paymentsTable');
+            table.innerHTML = '';
+            
+            demoData.payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.parentName}</td>
+                    <td>${payment.childName}</td>
+                    <td>$${payment.amount}</td>
+                    <td>${formatDate(payment.dueDate)}</td>
+                    <td><span class="badge badge-${payment.status}">${payment.status}</span></td>
+                    <td>${payment.paymentDate ? formatDate(payment.paymentDate) : 'Not paid'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${payment.status === 'pending' ? `
+                                <button class="btn btn-primary btn-sm" onclick="markAsPaid(${payment.id})">
+                                    <i class="fas fa-check"></i> Mark Paid
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="viewReceipt(${payment.id})">
+                                <i class="fas fa-receipt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function renderVerificationTable() {
+            const table = document.getElementById('verificationTable');
+            table.innerHTML = '';
+            
+            demoData.verificationCodes.forEach(code => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><code>${code.code}</code></td>
+                    <td>${code.childName}</td>
+                    <td>${formatDate(code.dob)}</td>
+                    <td>${code.parentName || 'N/A'}</td>
+                    <td>${formatDate(code.generatedDate)}</td>
+                    <td><span class="badge badge-${code.status}">${code.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="copyCode('${code.code}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCode('${code.code}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function openAddChildModal() {
+            document.getElementById('addChildModal').style.display = 'flex';
+            document.getElementById('addChildForm').reset();
+        }
+
+        function saveNewChild() {
+            const child = {
+                id: Date.now(),
+                firstName: document.getElementById('childFirstName').value.trim(),
+                lastName: document.getElementById('childLastName').value.trim(),
+                dob: document.getElementById('childDOB').value,
+                parentName: document.getElementById('childParentName').value.trim(),
+                parentEmail: document.getElementById('childParentEmail').value.trim(),
+                parentPhone: document.getElementById('childParentPhone').value.trim(),
+                room: document.getElementById('childRoom').value,
+                startDate: document.getElementById('childStartDate').value,
+                status: 'active'
+            };
+            
+            demoData.children.push(child);
+            saveDemoData();
+            renderChildrenTable();
+            updateDashboardStats();
+            closeModal('addChildModal');
+            showNotification('Child added successfully!');
+            
+            // Add to recent activity
+            addActivity(`Added new child: ${child.firstName} ${child.lastName}`);
+        }
+
+        function openVerificationModal() {
+            document.getElementById('verificationModal').style.display = 'flex';
+            document.getElementById('vChildFirstName').value = '';
+            document.getElementById('vChildLastName').value = '';
+            document.getElementById('vChildDOB').value = '';
+            document.getElementById('vParentName').value = '';
+        }
+
+        function generateCode() {
+            const firstName = document.getElementById('vChildFirstName').value.trim();
+            const lastName = document.getElementById('vChildLastName').value.trim();
+            const dob = document.getElementById('vChildDOB').value;
+            const parentName = document.getElementById('vParentName').value.trim();
+            
+            if (!firstName || !lastName || !dob) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Format date as YYYYMMDD
+            const dateObj = new Date(dob);
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            
+            // Generate code: YYYYMMDD + FirstName + LastName
+            const code = `${yyyy}${mm}${dd}${firstName}${lastName}`;
+            
+            // Save to demo data
+            const verificationCode = {
+                code: code,
+                childName: `${firstName} ${lastName}`,
+                dob: dob,
+                parentName: parentName,
+                generatedDate: new Date().toISOString().split('T')[0],
+                status: 'active'
+            };
+            
+            demoData.verificationCodes.push(verificationCode);
+            saveDemoData();
+            
+            // Also save to registered children for parent portal verification
+            const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+            registeredChildren[code] = {
+                childName: `${firstName} ${lastName}`,
+                dob: dob,
+                parentName: parentName
+            };
+            localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
+            
+            // Display the code
+            document.getElementById('generatedCodeDisplay').textContent = code;
+            document.getElementById('generatedCodeInfo').textContent = 
+                `For ${firstName} ${lastName}, born ${formatDate(dob)}`;
+            
+            closeModal('verificationModal');
+            document.getElementById('generatedCodeModal').style.display = 'flex';
+            
+            showNotification('Verification code generated!');
+            addActivity(`Generated verification code for ${firstName} ${lastName}`);
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('generatedCodeDisplay').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard!');
+            });
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function addActivity(message) {
+            const activityDiv = document.getElementById('recentActivity');
+            const activity = document.createElement('div');
+            activity.style.cssText = 'padding: 15px; background: #f8f9fa; border-radius: 5px; margin-bottom: 10px;';
+            activity.innerHTML = `
+                <i class="fas fa-info-circle" style="color: #17a2b8;"></i>
+                <span style="margin-left: 10px;">${message}</span>
+                <span style="float: right; color: #666; font-size: 0.9rem;">Just now</span>
+            `;
+            activityDiv.insertBefore(activity, activityDiv.firstChild);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function getRoomName(roomCode) {
+            const rooms = {
+                'infant': 'Infant Room',
+                'toddler': 'Toddler Room',
+                'preschool1': 'Preschool 1',
+                'preschool2': 'Preschool 2',
+                'aftercare': 'After School Care'
+            };
+            return rooms[roomCode] || roomCode;
+        }
+
+        function searchChildren() {
+            const searchTerm = document.getElementById('searchChildren').value.toLowerCase();
+            const rows = document.querySelectorAll('#childrenTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function searchParents() {
+            const searchTerm = document.getElementById('searchParents').value.toLowerCase();
+            const rows = document.querySelectorAll('#parentsTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(demoData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `daycare-data-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Data exported successfully!');
+            addActivity('Exported all data');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function changeAdminPassword() {
+            const currentPass = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmNewPassword').value;
+            
+            // Get current admin
+            const adminAccounts = JSON.parse(localStorage.getItem('adminAccounts') || '{}');
+            const currentAdminAccount = adminAccounts[currentAdmin.username];
+            
+            if (!currentAdminAccount) {
+                alert('Admin account not found!');
+                return;
+            }
+            
+            if (currentAdminAccount.password !== currentPass) {
+                alert('Current password is incorrect!');
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                alert('New passwords do not match!');
+                return;
+            }
+            
+            if (newPass.length < 8) {
+                alert('New password must be at least 8 characters!');
+                return;
+            }
+            
+            // Update password
+            currentAdminAccount.password = newPass;
+            adminAccounts[currentAdmin.username] = currentAdminAccount;
+            localStorage.setItem('adminAccounts', JSON.stringify(adminAccounts));
+            
+            // Also update session
+            currentAdmin.password = newPass;
+            sessionStorage.setItem('adminUser', JSON.stringify(currentAdmin));
+            
+            document.getElementById('changePasswordForm').reset();
+            showNotification('Password changed successfully!');
+            addActivity('Changed admin password');
+        }
+
+        function startSessionTimer() {
+            // Auto logout after 30 minutes of inactivity
+            let time = 30 * 60 * 1000; // 30 minutes in milliseconds
+            let timer = setInterval(function() {
+                time -= 1000;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    sessionStorage.removeItem('adminUser');
+                    sessionStorage.removeItem('isAdmin');
+                    alert('Session expired. Please login again.');
+                    window.location.href = 'admin-login.html';
+                }
+            }, 1000);
+            
+            // Reset timer on user activity
+            document.addEventListener('click', function() {
+                time = 30 * 60 * 1000;
+            });
+            
+            document.addEventListener('keypress', function() {
+                time = 30 * 60 * 1000;
+            });
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+        // Demo functions (would be fully implemented in production)
+        function editChild(id) {
+            showNotification('Edit feature coming soon!');
+        }
+
+        function viewChild(id) {
+            showNotification('View details coming soon!');
+        }
+
+        function deleteChild(id) {
+            if (confirm('Are you sure you want to delete this child?')) {
+                demoData.children = demoData.children.filter(child => child.id !== id);
+                saveDemoData();
+                renderChildrenTable();
+                updateDashboardStats();
+                showNotification('Child deleted!');
+                addActivity('Deleted a child record');
+            }
+        }
+
+        function contactParent(email) {
+            window.location.href = `mailto:${email}`;
+        }
+
+        function viewParent(username) {
+            showNotification('Viewing parent details...');
+        }
+
+        function markAsPaid(id) {
+            const payment = demoData.payments.find(p => p.id === id);
+            if (payment) {
+                payment.status = 'paid';
+                payment.paymentDate = new Date().toISOString().split('T')[0];
+                saveDemoData();
+                renderPaymentsTable();
+                updateDashboardStats();
+                showNotification('Payment marked as paid!');
+                addActivity(`Marked payment as paid for ${payment.parentName}`);
+            }
+        }
+
+        function viewReceipt(id) {
+            showNotification('View receipt feature coming soon!');
+        }
+
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard!');
+            });
+        }
+
+        function deleteCode(code) {
+            if (confirm('Are you sure you want to delete this verification code?')) {
+                demoData.verificationCodes = demoData.verificationCodes.filter(c => c.code !== code);
+                saveDemoData();
+                renderVerificationTable();
+                showNotification('Verification code deleted!');
+                addActivity('Deleted a verification code');
+            }
+        }
+    </script>
+</body>
+</html>
