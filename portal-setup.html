@@ -593,6 +593,161 @@
             };
             localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
         });
+        <script>
+// ===================================================
+// FIXED PARENT PORTAL VERIFICATION
+// ===================================================
+function verifyCodeEnhanced(enteredCode) {
+    console.log('🔍 Verifying code:', enteredCode);
+    
+    // Normalize the code
+    const cleanCode = enteredCode.trim();
+    
+    // Check in BOTH systems
+    let childData = null;
+    let source = '';
+    
+    // 1. Check primary system (registeredChildren)
+    const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+    if (registeredChildren[cleanCode]) {
+        childData = registeredChildren[cleanCode];
+        source = 'primary';
+    }
+    
+    // 2. Check admin system backup
+    if (!childData) {
+        const adminData = JSON.parse(localStorage.getItem('daycareAdminData') || '{}');
+        const adminCodes = adminData.verificationCodes || [];
+        const adminCode = adminCodes.find(c => c.code === cleanCode);
+        
+        if (adminCode) {
+            childData = {
+                childName: adminCode.childName,
+                dob: adminCode.dob,
+                parentName: adminCode.parentName,
+                status: adminCode.status
+            };
+            source = 'admin_backup';
+            
+            // Auto-sync this code to primary system
+            registeredChildren[cleanCode] = childData;
+            localStorage.setItem('registeredChildren', JSON.stringify(registeredChildren));
+        }
+    }
+    
+    // 3. Try flexible matching
+    if (!childData) {
+        childData = findFlexibleMatch(cleanCode);
+        if (childData) {
+            source = 'flexible_match';
+        }
+    }
+    
+    // Return result
+    if (childData) {
+        console.log(`✅ Code verified (source: ${source})`, childData);
+        return {
+            success: true,
+            childData: childData,
+            message: `Welcome! Verified for ${childData.childName}`
+        };
+    } else {
+        console.log('❌ Code not found');
+        return {
+            success: false,
+            message: "Verification code not found. Please check your code or contact the daycare office."
+        };
+    }
+}
+
+function findFlexibleMatch(enteredCode) {
+    console.log('🔎 Trying flexible matching...');
+    
+    // Get all codes from both systems
+    const registeredChildren = JSON.parse(localStorage.getItem('registeredChildren') || '{}');
+    const adminData = JSON.parse(localStorage.getItem('daycareAdminData') || '{}');
+    const adminCodes = adminData.verificationCodes || [];
+    
+    // Combine all codes
+    const allCodes = { ...registeredChildren };
+    adminCodes.forEach(code => {
+        if (code.code && !allCodes[code.code]) {
+            allCodes[code.code] = {
+                childName: code.childName,
+                dob: code.dob,
+                parentName: code.parentName
+            };
+        }
+    });
+    
+    // Try variations
+    for (const [storedCode, data] of Object.entries(allCodes)) {
+        // Remove spaces and special characters
+        const cleanStored = storedCode.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        const cleanEntered = enteredCode.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        
+        // Exact match (after cleaning)
+        if (cleanStored === cleanEntered) {
+            console.log('✅ Found match after cleaning');
+            return data;
+        }
+        
+        // Contains match (entered code contains stored code or vice versa)
+        if (cleanEntered.includes(cleanStored) || cleanStored.includes(cleanEntered)) {
+            console.log('✅ Found partial match');
+            return data;
+        }
+        
+        // Date variations - try YYYYMMDD format
+        const dateMatch = matchByDate(enteredCode, storedCode, data);
+        if (dateMatch) {
+            console.log('✅ Found date-based match');
+            return dateMatch;
+        }
+    }
+    
+    return null;
+}
+
+function matchByDate(entered, stored, data) {
+    // Try to extract dates (YYYYMMDD format)
+    const enteredDateMatch = entered.match(/(\d{8})/);
+    const storedDateMatch = stored.match(/(\d{8})/);
+    
+    if (enteredDateMatch && storedDateMatch) {
+        const enteredDate = enteredDateMatch[1];
+        const storedDate = storedDateMatch[1];
+        
+        // If dates are close (within 1-2 digits), it might be a typo
+        if (isDateSimilar(enteredDate, storedDate)) {
+            // Extract name part
+            const enteredName = entered.replace(enteredDate, '');
+            const storedName = stored.replace(storedDate, '');
+            
+            // If names are similar
+            if (areNamesSimilar(enteredName, storedName)) {
+                return data;
+            }
+        }
+    }
+    
+    return null;
+}
+
+function isDateSimilar(date1, date2) {
+    // Simple similarity check - allow small differences
+    const diff = Math.abs(parseInt(date1) - parseInt(date2));
+    return diff <= 1000000; // Allow up to 10 days difference in YYYYMMDD format
+}
+
+function areNamesSimilar(name1, name2) {
+    const clean1 = name1.toLowerCase().replace(/[^a-z]/g, '');
+    const clean2 = name2.toLowerCase().replace(/[^a-z]/g, '');
+    
+    // Check if one contains the other
+    return clean1.includes(clean2) || clean2.includes(clean1);
+}
+</script>
         // Enhanced verification function - add to your parent portal setup page
 function verifyCodeFlexibly(enteredCode) {
     // Normalize the entered code (remove spaces, make lowercase)
