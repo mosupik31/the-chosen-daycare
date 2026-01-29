@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal Login - The Chosen Day Care</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-container {
+            padding: 120px 0 80px;
+            min-height: 100vh;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .login-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(42, 92, 167, 0.1);
+        }
+        
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .login-btn:hover {
+            background-color: #1d4a8a;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo.png" alt="The Chosen Day Care Logo" height="60">
+                <div class="logo-text">
+                    <h1>THE CHOSEN DAY CARE</h1>
+                    <p>Nurturing Tomorrow's Leaders Today</p>
+                </div>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#about">About Us</a></li>
+                    <li><a href="index.html#programs">Programs</a></li>
+                    <li><a href="index.html#admissions">Admissions</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="login.html" class="btn-login active">Parent Portal</a></li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Login Content -->
+    <div class="login-container">
+        <div class="container">
+            <div class="login-box">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h2>Parent Portal Login</h2>
+                    <p>Access your child's information, payments, and documents</p>
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    Invalid username or password. Please try again.
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter your username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <div class="login-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember">
+                            <label for="remember">Remember me</label>
+                        </div>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">Log In</button>
+                </form>
+                
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="portal-setup.html">Set up your parent portal</a></p>
+                    <p><small>Need help? Contact the daycare office at (555) 123-4567</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="images/logo.png" alt="The Chosen Day Care Logo" height="50">
+                        <h3>THE CHOSEN DAY CARE</h3>
+                    </div>
+                    <p>Providing exceptional childcare services since 2010.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#programs">Programs</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Parent Resources</h4>
+                    <ul>
+                        <li><a href="login.html">Parent Portal Login</a></li>
+                        <li><a href="portal-setup.html">Set Up Portal Account</a></li>
+                        <li><a href="#">Parent Handbook</a></li>
+                        <li><a href="#">Calendar & Events</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Education Street</p>
+                    <p><i class="fas fa-phone"></i> (555) 123-4567</p>
+                    <p><i class="fas fa-envelope"></i> info@chosendaycare.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 The Chosen Day Care. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            
+            // Get stored accounts
+            const accounts = JSON.parse(localStorage.getItem('parentAccounts') || '{}');
+            const account = accounts[username];
+            
+            // For demo, also check for demo account
+            if (username === 'demo' && password === 'demo123') {
+                // Redirect to dashboard (demo mode)
+                window.location.href = 'dashboard.html?demo=true';
+                return;
+            }
+            
+            if (account && atob(account.password) === password) {
+                // Update last login
+                account.lastLogin = new Date().toISOString();
+                accounts[username] = account;
+                localStorage.setItem('parentAccounts', JSON.stringify(accounts));
+                
+                // Store current session
+                sessionStorage.setItem('currentUser', JSON.stringify(account));
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // Show error
+                document.getElementById('errorMessage').style.display = 'block';
+                
+                // Clear password field
+                document.getElementById('password').value = '';
+            }
+        });
+        
+        // Initialize mobile menu
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+        });
+        
+        // Demo credentials hint
+        window.addEventListener('load', function() {
+            console.log('Demo credentials: username: demo, password: demo123');
+        });
+    </script>
+</body>
+</html>
