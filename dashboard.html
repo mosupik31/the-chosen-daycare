@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal Dashboard - The Chosen Day Care</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            padding: 120px 0 40px;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+        }
+        
+        .dashboard-header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #2a5ca7, #3a7bd5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .dashboard-nav {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-tab a {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab a:hover,
+        .nav-tab a.active {
+            color: #2a5ca7;
+            border-bottom-color: #2a5ca7;
+            background-color: #f8f9fa;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .payment-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2a5ca7;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .payment-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 25px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #2a5ca7;
+            background: #f8f9fa;
+        }
+        
+        .document-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .document-card:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo.png" alt="The Chosen Day Care Logo" height="60">
+                <div class="logo-text">
+                    <h1>THE CHOSEN DAY CARE</h1>
+                    <p>Parent Portal</p>
+                </div>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="#" id="logoutBtn" class="btn-login">Logout</a></li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="notification" id="notification">
+                <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
+            </div>
+            
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userInitials">JD</div>
+                    <div>
+                        <h3 id="userName">Jane Doe</h3>
+                        <p id="userChildren">Parent of: Emily Doe</p>
+                        <p style="color: #6c757d; font-size: 0.9rem;">Last login: <span id="lastLogin">Today at 2:30 PM</span></p>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+            
+            <div class="dashboard-nav">
+                <ul class="nav-tabs">
+                    <li class="nav-tab"><a href="#" class="tab-link active" data-tab="overview"><i class="fas fa-home"></i> Overview</a></li>
+                    <li class="nav-tab"><a href="#" class="tab-link" data-tab="payments"><i class="fas fa-credit-card"></i> Payments</a></li>
+                    <li class="nav-tab"><a href="#" class="tab-link" data-tab="documents"><i class="fas fa-file"></i> Documents</a></li>
+                    <li class="nav-tab"><a href="#" class="tab-link" data-tab="profile"><i class="fas fa-user"></i> Profile</a></li>
+                </ul>
+            </div>
+            
+            <div id="overview" class="tab-content active">
+                <div class="dashboard-card">
+                    <h2>Welcome to Your Parent Portal</h2>
+                    <p>Here you can manage your child's information, view payments, and access important documents.</p>
+                    
+                    <div class="quick-stats">
+                        <div class="stat-box">
+                            <h3><i class="fas fa-calendar-check" style="color: #2a5ca7;"></i> Upcoming</h3>
+                            <p style="font-size: 1.2rem; margin: 10px 0;">Field Trip: Friday</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3><i class="fas fa-dollar-sign" style="color: #28a745;"></i> Balance</h3>
+                            <p style="font-size: 1.2rem; margin: 10px 0;">$0.00</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3><i class="fas fa-file-alt" style="color: #17a2b8;"></i> Documents</h3>
+                            <p style="font-size: 1.2rem; margin: 10px 0;">3 available</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3><i class="fas fa-bell" style="color: #f8c300;"></i> Notifications</h3>
+                            <p style="font-size: 1.2rem; margin: 10px 0;">1 new</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3>Recent Activity</h3>
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee;">
+                            <i class="fas fa-check-circle" style="color: #28a745; margin-right: 15px; font-size: 1.2rem;"></i>
+                            <div style="flex: 1;">
+                                <p style="font-weight: 500;">Payment Received</p>
+                                <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">October tuition payment confirmed</p>
+                            </div>
+                            <span style="color: #666; font-size: 0.9rem;">Today</span>
+                        </div>
+                        <div style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee;">
+                            <i class="fas fa-file-upload" style="color: #17a2b8; margin-right: 15px; font-size: 1.2rem;"></i>
+                            <div style="flex: 1;">
+                                <p style="font-weight: 500;">Document Uploaded</p>
+                                <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Immunization record updated</p>
+                            </div>
+                            <span style="color: #666; font-size: 0.9rem;">2 days ago</span>
+                        </div>
+                        <div style="display: flex; align-items: center; padding: 15px 0;">
+                            <i class="fas fa-calendar" style="color: #f8c300; margin-right: 15px; font-size: 1.2rem;"></i>
+                            <div style="flex: 1;">
+                                <p style="font-weight: 500;">Field Trip Reminder</p>
+                                <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Zoo trip this Friday</p>
+                            </div>
+                            <span style="color: #666; font-size: 0.9rem;">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="payments" class="tab-content">
+                <div class="dashboard-card">
+                    <h2>Payment History</h2>
+                    <p>View your payment history and upload proof of payment.</p>
+                    
+                    <table class="payment-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Oct 15, 2024</td>
+                                <td>Monthly Tuition - October</td>
+                                <td>$450.00</td>
+                                <td><span class="status status-paid">Paid</span></td>
+                                <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;" onclick="viewReceipt('october')">View Receipt</button></td>
+                            </tr>
+                            <tr>
+                                <td>Nov 15, 2024</td>
+                                <td>Monthly Tuition - November</td>
+                                <td>$450.00</td>
+                                <td><span class="status status-pending">Pending</span></td>
+                                <td><button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.9rem;" onclick="showUploadSection()">Upload Proof</button></td>
+                            </tr>
+                            <tr>
+                                <td>Dec 15, 2024</td>
+                                <td>Monthly Tuition - December</td>
+                                <td>$450.00</td>
+                                <td><span class="status status-pending">Due 12/15</span></td>
+                                <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;" disabled>Not Yet Due</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 25px;">
+                        <h4><i class="fas fa-info-circle"></i> Payment Information</h4>
+                        <p>All payments are due on the 15th of each month. Late fees may apply after the 20th.</p>
+                        <p>Contact the office for payment plan options.</p>
+                    </div>
+                    
+                    <div id="uploadSection" style="display: none; margin-top: 30px;">
+                        <h3>Upload Payment Proof</h3>
+                        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #2a5ca7; margin-bottom: 15px;"></i>
+                            <h4>Click to upload payment receipt</h4>
+                            <p>PDF, JPG, or PNG files (Max 5MB)</p>
+                            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                        </div>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button class="btn btn-secondary" onclick="hideUploadSection()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="documents" class="tab-content">
+                <div class="dashboard-card">
+                    <h2>Important Documents</h2>
+                    <p>Access and download important daycare documents.</p>
+                    
+                    <div style="margin-top: 30px;">
+                        <div class="document-card">
+                            <div style="flex: 1;">
+                                <h4 style="color: #2a5ca7; margin-bottom: 5px;">Parent Handbook 2024</h4>
+                                <p style="color: #666; margin: 0;">Updated policies and procedures</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="downloadDocument('handbook')">Download</button>
+                        </div>
+                        
+                        <div class="document-card">
+                            <div style="flex: 1;">
+                                <h4 style="color: #2a5ca7; margin-bottom: 5px;">Immunization Records</h4>
+                                <p style="color: #666; margin: 0;">Child: Emily Doe - Last updated: Oct 2024</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="uploadDocument()">Update</button>
+                        </div>
+                        
+                        <div class="document-card">
+                            <div style="flex: 1;">
+                                <h4 style="color: #2a5ca7; margin-bottom: 5px;">Monthly Activity Calendar</h4>
+                                <p style="color: #666; margin: 0;">November 2024 activities and events</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="downloadDocument('calendar')">Download</button>
+                        </div>
+                        
+                        <div class="document-card">
+                            <div style="flex: 1;">
+                                <h4 style="color: #2a5ca7; margin-bottom: 5px;">Emergency Contact Form</h4>
+                                <p style="color: #666; margin: 0;">Update emergency contact information</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="editEmergencyContact()">Edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="profile" class="tab-content">
+                <div class="dashboard-card">
+                    <h2>Your Profile</h2>
+                    
+                    <form id="profileForm" style="margin-top: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="profileName" value="Jane Doe">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="profileEmail" value="jane.doe@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="profilePhone" value="(555) 123-4567">
+                            </div>
+                            <div class="form-group">
+                                <label>Emergency Contact</label>
+                                <input type="tel" id="profileEmergency" value="(555) 987-6543">
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 30px;">Children Information</h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4>Emily Doe</h4>
+                                    <p>Age: 4 years | Room: Preschool 2 | Teacher: Ms. Smith</p>
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="viewChildDetails()">View Details</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px; display: flex; gap: 15px;">
+                            <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" onclick="changePassword()">Change Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="images/logo.png" alt="The Chosen Day Care Logo" height="50">
+                        <h3>THE CHOSEN DAY CARE</h3>
+                    </div>
+                    <p>Parent Portal - Secure Access</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Website Home</a></li>
+                        <li><a href="index.html#contact">Contact Daycare</a></li>
+                        <li><a href="portal-setup.html">Setup New Account</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <p>Having issues with the portal?</p>
+                    <p>Email: support@chosendaycare.com</p>
+                    <p>Phone: (555) 123-4567 ext. 2</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 The Chosen Day Care. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            if (!userData || !userData.email) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = userData.name || 'Parent';
+            document.getElementById('userInitials').textContent = getInitials(userData.name || 'P');
+            document.getElementById('userChildren').textContent = `Parent of: ${userData.childName || 'Child'}`;
+            
+            document.getElementById('profileName').value = userData.name || '';
+            document.getElementById('profileEmail').value = userData.email || '';
+            
+            document.querySelectorAll('.tab-link').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+                document.querySelector('.main-nav').classList.toggle('active');
+                this.querySelector('i').classList.toggle('fa-bars');
+                this.querySelector('i').classList.toggle('fa-times');
+            });
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const dateString = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('lastLogin').textContent = `${dateString} at ${timeString}`;
+        });
+        
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+        
+        function showUploadSection() {
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth' });
+            
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    showNotification(`File "${file.name}" uploaded successfully! The daycare will verify your payment.`);
+                    hideUploadSection();
+                }
+            });
+        }
+        
+        function hideUploadSection() {
+            document.getElementById('uploadSection').style.display = 'none';
+        }
+        
+        function viewReceipt(month) {
+            showNotification(`Opening receipt for ${month} payment...`);
+        }
+        
+        function downloadDocument(type) {
+            showNotification(`Downloading ${type} document...`);
+        }
+        
+        function uploadDocument() {
+            showNotification('Upload feature coming soon!');
+        }
+        
+        function editEmergencyContact() {
+            showNotification('Emergency contact editor opening...');
+        }
+        
+        function saveProfile() {
+            showNotification('Profile updated successfully!');
+        }
+        
+        function changePassword() {
+            const newPassword = prompt('Enter new password:');
+            if (newPassword) {
+                showNotification('Password changed successfully!');
+            }
+        }
+        
+        function viewChildDetails() {
+            showNotification('Loading child details...');
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        setInterval(function() {
+            const lastActivity = localStorage.getItem('lastActivity');
+            if (lastActivity) {
+                const now = new Date().getTime();
+                const timeDiff = now - parseInt(lastActivity);
+                if (timeDiff > 30 * 60 * 1000) {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.href = 'login.html?timeout=true';
+                }
+            }
+        }, 60000);
+        
+        function updateLastActivity() {
+            localStorage.setItem('lastActivity', new Date().getTime());
+        }
+        
+        ['click', 'keypress', 'scroll'].forEach(event => {
+            document.addEventListener(event, updateLastActivity);
+        });
+        
+        updateLastActivity();
+    </script>
+</body>
+</html>
