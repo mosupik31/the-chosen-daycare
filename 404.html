@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - The Chosen Day Care</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .error-container {
+            padding: 150px 0 100px;
+            text-align: center;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .error-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .error-icon {
+            font-size: 5rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        .error-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo.png" alt="The Chosen Day Care Logo" height="60">
+                <div class="logo-text">
+                    <h1>THE CHOSEN DAY CARE</h1>
+                    <p>Nurturing Tomorrow's Leaders Today</p>
+                </div>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#about">About Us</a></li>
+                    <li><a href="index.html#programs">Programs</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="login.html" class="btn-login">Parent Portal</a></li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="error-container">
+        <div class="container">
+            <div class="error-content">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h1>404</h1>
+                <h2>Page Not Found</h2>
+                <p>The page you're looking for doesn't exist or has been moved.</p>
+                <p style="color: #6c757d; margin-top: 10px;">Please check the URL or use the navigation below.</p>
+                
+                <div class="error-actions">
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Return to Homepage
+                    </a>
+                    <a href="index.html#contact" class="btn btn-secondary">
+                        <i class="fas fa-envelope"></i> Contact Us
+                    </a>
+                    <a href="portal-setup.html" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Parent Portal Setup
+                    </a>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <h3>Popular Pages</h3>
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+                        <a href="login.html" style="color: #2a5ca7; text-decoration: none;">Parent Login</a>
+                        <a href="portal-setup.html" style="color: #2a5ca7; text-decoration: none;">Setup Portal</a>
+                        <a href="index.html#programs" style="color: #2a5ca7; text-decoration: none;">Programs</a>
+                        <a href="index.html#admissions" style="color: #2a5ca7; text-decoration: none;">Admissions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="images/logo.png" alt="The Chosen Day Care Logo" height="50">
+                        <h3>THE CHOSEN DAY CARE</h3>
+                    </div>
+                    <p>Providing exceptional childcare services since 2010.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#programs">Programs</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Parent Resources</h4>
+                    <ul>
+                        <li><a href="login.html">Parent Portal Login</a></li>
+                        <li><a href="portal-setup.html">Set Up Portal Account</a></li>
+                        <li><a href="#">Parent Handbook</a></li>
+                        <li><a href="#">Calendar & Events</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Education Street</p>
+                    <p><i class="fas fa-phone"></i> (555) 123-4567</p>
+                    <p><i class="fas fa-envelope"></i> info@chosendaycare.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 The Chosen Day Care. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
+        });
+        
+        const currentYear = new Date().getFullYear();
+        document.querySelector('.footer-bottom p').innerHTML = `&copy; ${currentYear} The Chosen Day Care. All rights reserved.`;
+    </script>
+</body>
+</html>
